@@ -31,6 +31,16 @@ ELSE
 	i:=32
 ENDIF
 
+--/Else con if anidado/--
+IF(i==15 AND a==4)THEN
+	i:=16
+ELSE
+	IF(j==2 OR w==7)THEN
+	i:=32
+	cd:=44
+	ENDIF
+ENDIF
+
 --/MOD/--
 (a+b) mod (b+c)
 
@@ -47,6 +57,7 @@ READ n
 PRINT b
 PRINT "HOLA"
 print "hello"
+PRINT "HOLA fdf 6543 mm"
 read n
 print i
 print "mundo"
