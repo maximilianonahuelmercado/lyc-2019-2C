@@ -2,8 +2,8 @@
     #include <stdio.h>
     #include <stdlib.h>
     #include "y.tab.h"
-    #include "h_files/constantes.h"
-    #include "h_files/ts.h"
+    #include "files_h/constantes.h"
+    #include "files_h/ts.h"
 
     // Funciones que no es necesario incluirlas (Ya que se importa desde y.tab.h).
     // Se declaran unicamente para evitar warning [-Wimplicit-function-declaration] al complilar.
@@ -28,6 +28,7 @@ endvar|ENDVAR      			  {	return ENDVAR; }
 inlist|INLIST              { return INLIST; }
 mod|MOD                 { return MOD; }
 div|DIV                 { return DIV; }
+inlist|INLIST       {return INLIST; }
 int|INT|INTEGER			{	return INTEGER; }
 float|FLOAT    			{	return REAL;	}
 string|STRING  			{	return STRING;	}
@@ -110,6 +111,10 @@ read|READ    			    {	return READ;	    }
                         }
 {COMENTARIO} 			{ }
 {COMENTARIO_ANIDADO}	{ }
+"\n"					{ }
+"\r\n"					{ }
+"\t"					{ }
+" "						{ }
 .						{
 							char msg[300];
 							sprintf(msg, "ERROR Lexico - Caracter \'%s\' invalido", yytext);
