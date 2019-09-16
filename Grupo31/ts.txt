@@ -4,9 +4,13 @@ Nombre                        Tipo        Valor                         Longitud
 4                            CONST_INT                                             
 16                           CONST_INT                                             
 32                           CONST_INT                                             
+2                            CONST_INT                                             
+7                            CONST_INT                                             
+44                           CONST_INT                                             
 2.3                          CONST_REAL                                            
 1.22                         CONST_REAL                                            
 "HOLA"                       CONST_STR                                             
 "hello"                      CONST_STR                                             
+"HOLA fdf 6543 mm"           CONST_STR                                             
 "mundo"                      CONST_STR                                             
 "world"                      CONST_STR                                             
