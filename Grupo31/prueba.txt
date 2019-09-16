@@ -1,0 +1,53 @@
+--/ Lenguajes y Compiladores /--
+
+--/Comentario --/anidado/-- /--
+
+
+--/Declaraciones/--
+
+VAR
+[int, float, string]:[a, b, c]
+ENDVAR
+
+
+--/Asignaciones/--
+
+a:=b
+
+--/Repeat/--
+REPEAT(a >= b)	
+	c:=a+5
+ENDREPEAT
+
+--/Condicion/--
+IF(i==15 AND a==4)THEN
+	i:=16
+ENDIF
+
+--/Condicion else/--
+IF(i==15 AND a==4)THEN
+	i:=16
+ELSE
+	i:=32
+ENDIF
+
+--/MOD/--
+(a+b) mod (b+c)
+
+--/DIV/--
+
+(a+b) div (b+c)
+
+--/INLIST/--
+
+INLIST(z; [2.3 ; 1.22])
+
+--/READ AND PRINT/--
+READ n
+PRINT b
+PRINT "HOLA"
+print "hello"
+read n
+print i
+print "mundo"
+print "world"
