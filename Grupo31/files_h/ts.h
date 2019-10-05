@@ -17,7 +17,14 @@ struct struct_tablaSimbolos
 struct struct_tablaSimbolos tablaSimbolos[10000];
 
 void insertarTokenEnTS(char *, char *);
+int existeTokenEnTS(char *);
+char *recuperarNombreTS(char *);
+char *recuperarTipoTS(char *);
+char *recuperarValorTS(char *);
 int crearArchivoTS();
+void debugTS();
+int obtenerTamTS();
+void prepararTSParaAssembler();
 void imprimirTS();
 
 #endif

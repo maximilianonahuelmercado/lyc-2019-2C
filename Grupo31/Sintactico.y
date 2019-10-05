@@ -3,8 +3,10 @@
 	#include <stdlib.h>
 	#include <string.h>
 	#include "y.tab.h"
+	#include "files_h/tercetos.h"
 	#include "files_h/constantes.h"
 	#include "files_h/ts.h"
+	#include "files_h/pila.h"
 
 	// Declaraciones onbligatorias para quitar advertencias
 	int yylineno;
@@ -12,6 +14,39 @@
 	int yylex();
 	int yyerror(char *msg);
 	int yyparse();
+
+	// Cabecera funciones varias
+		void insertarEnArrayDeclaracion(char *);
+		void validarDeclaracionTipoDato(char *);
+		char * negarComparador(char*);
+		char * obtenerNuevoNombreEtiqueta(char *);
+		void insertarEnArrayComparacionTipos(char *);
+		void insertarEnArrayComparacionTiposDirecto(char *);
+		void imprimirArrayComparacionTipos();
+		void compararTipos();
+		char * tipoConstanteConvertido(char*);
+		void insertarEnArrayTercetos(char *operador, char *operando1, char *operando2);
+		void crearTercetosDelArray();
+
+		// Declaro la pila (estructura externa que me servira para resolver GCI)
+		t_pila pila;
+		t_pila pila_condicion_doble;
+		t_pila pila_ciclo_especial;
+		char condicion[5]; // puede ser AND u OR
+
+		// Arrays
+		char * arrayDeclaraciones[100];	// array para declaraciones
+		int longitud_arrayDeclaraciones = 0; // incremento en el array arrayDeclaraciones
+		char * arrayComparacionTipos[100];	// array para comparar tipos
+		int longitud_arrayComparacionTipos = 0; // incremento en el array arrayComparacionTipos
+		// Auxiliar para manejar tercetos;
+		int indiceExpresion, indiceTermino, indiceFactor, indiceLongitud;
+		int indiceAux, indiceUltimo, indiceIzq, indiceDer, indiceComparador, indiceComparador1, indiceComparador2,
+		indiceId;
+		int indicePrincipioBloque;
+		char idAsignarStr[50];
+
+		int startEtiqueta = 0;
 %}
 
 // Especifica el valor semantico que tendra la variable global propia de bison yylval.
@@ -76,9 +111,10 @@
 
 programa:
 	{	printf("\tInicia el COMPILADOR\n\n");	}
-		bloque
+	est_declaracion bloque
 	{	printf("\n\tFin COMPILADOR OK\n");
 		crearArchivoTS();
+		crearArchivoTercetosIntermedia();
 	}	;
 
 est_declaracion:
@@ -94,7 +130,7 @@ NODO:
 NODO:
 	TIPO_DATO CAR_COMA NODO CAR_COMA ID;
 TIPO_DATO:
-	INTEGER | REAL | STRING ;
+	INTEGER {	validarDeclaracionTipoDato("INTEGER");	} | REAL {	validarDeclaracionTipoDato("REAL");	} | STRING {	validarDeclaracionTipoDato("STRING");	};
 
 bloque:
 	sentencia
@@ -102,10 +138,15 @@ bloque:
 
 sentencia:
 	ciclo
+	{
+		crearTerceto(obtenerNuevoNombreEtiqueta("fin_repeat"),"_","_");
+	}
 	| seleccion
+		{
+			crearTerceto(obtenerNuevoNombreEtiqueta("fin_seleccion"),"_","_");
+		}
 	| asignacion
 	| entrada_salida
-	| est_declaracion
 	| modulo
 	| division
 	| inlist;
@@ -113,11 +154,44 @@ sentencia:
 ciclo:
 	REPEAT
 	{	printf("\t\tREPEAT\n");
+		indiceAux=crearTerceto(obtenerNuevoNombreEtiqueta("inicio_repeat"),"_","_");
+		poner_en_pila(&pila,&indiceAux);
 	}
 	CAR_PA condicion CAR_PC
+	{
+		indicePrincipioBloque = obtenerIndiceActual();
+	}
 	bloque
 	ENDREPEAT
 	{	printf("\t\tENDREPEAT\n");
+	int indiceDesapilado;
+	int indiceActual = obtenerIndiceActual();
+	if(pila_vacia(&pila_condicion_doble) == PILA_VACIA)
+	{
+		sacar_de_pila(&pila, &indiceDesapilado);
+		modificarTerceto(indiceDesapilado, 2, armarIndiceI(indiceActual+1));
+	}
+	else
+	{
+		if(strcmp(condicion,"AND") == 0)
+		{
+			sacar_de_pila(&pila_condicion_doble, &indiceDesapilado);
+			modificarTerceto(indiceDesapilado, 2, armarIndiceI(indiceActual+1));
+			sacar_de_pila(&pila_condicion_doble, &indiceDesapilado);
+			modificarTerceto(indiceDesapilado, 2, armarIndiceI(indiceActual+1));
+		}
+		if(strcmp(condicion,"OR") == 0)
+		{
+			sacar_de_pila(&pila_condicion_doble, &indiceDesapilado);
+			modificarTerceto(indiceDesapilado, 2, armarIndiceI(indiceActual+1));
+			sacar_de_pila(&pila_condicion_doble, &indiceDesapilado);
+			modificarTerceto(indiceDesapilado, 2, armarIndiceI(indicePrincipioBloque));
+		}
+		// Debo desapilar el ultimo porque no me sirve
+		sacar_de_pila(&pila, &indiceDesapilado);
+	}
+	sacar_de_pila(&pila, &indiceDesapilado);
+	crearTerceto("JMP",armarIndiceI(indiceDesapilado),"_");
 	}	;
 
 modulo:
@@ -134,86 +208,295 @@ inlist:
 
 lista_expresiones:
 			expresion
-			| lista_expresiones CAR_PYC expresion ;
+			{
+
+				crearTerceto("CMP",armarIndiceI(indiceId),armarIndiceD(indiceExpresion));
+				indiceComparador = crearTerceto("JNE","_","_");
+				poner_en_pila(&pila_ciclo_especial,&indiceComparador);
+			}
+
+			| lista_expresiones CAR_PYC expresion
+			{
+				crearTerceto("CMP",armarIndiceI(indiceId),armarIndiceD(indiceExpresion));
+				indiceComparador = crearTerceto("JNE","_","_");
+				poner_en_pila(&pila_ciclo_especial,&indiceComparador);
+			};
 
 asignacion:
 				lista_id expresion
-			{	printf("\t\tASIGNACION\n");
-		};
+			{
+					printf("\t\tASIGNACION\n");
+					compararTipos();
+
+					indiceAux = crearTerceto(idAsignarStr,"_","_");
+
+					crearTerceto("=",armarIndiceI(indiceAux),armarIndiceD(indiceExpresion));
+		 };
 
 lista_id:
-	ID OP_ASIG;
+	ID OP_ASIG
+	{
+		insertarEnArrayComparacionTipos(yylval.str_val);
+		strcpy(idAsignarStr, yylval.str_val);
+	};
 
 entrada_salida:
 	READ	ID
-	{printf("\t\tREAD\n");}
+	{
+		printf("\t\tREAD\n");
+		indiceAux = crearTerceto(yylval.str_val,"_","_");
+		crearTerceto("READ",armarIndiceI(indiceAux),"_");
+	}
 	| PRINT ID
-	{printf("\t\tPRINT\n");}
+	 {
+			indiceAux = crearTerceto(yylval.str_val,"_","_");
+			crearTerceto("PRINT",armarIndiceI(indiceAux),"_");
+		}
 	|
 	PRINT CONST_STR
-	{printf("\t\tPRINT\n");};
+	{
+		indiceAux = crearTerceto(yylval.str_val,"_","_");
+		crearTerceto("DISPLAY",armarIndiceI(indiceAux),"_");
+	};
+
 
 
 seleccion:
 	IF CAR_PA condicion CAR_PC THEN
 	bloque
 	{printf("\t\tIF\n");}
-	ENDIF {printf("\t\tENDIF\n");}
+	ENDIF
+	{
+		printf("\t\tENDIF\n");
+		int indiceDesapilado;
+		int indiceActual = obtenerIndiceActual();
+		if(pila_vacia(&pila_condicion_doble) == PILA_VACIA)
+		{
+			sacar_de_pila(&pila, &indiceDesapilado);
+			modificarTerceto(indiceDesapilado, 2, armarIndiceI(indiceActual));
+		}
+		else
+		{
+			if(strcmp(condicion,"AND") == 0)
+			{
+				sacar_de_pila(&pila_condicion_doble, &indiceDesapilado);
+				modificarTerceto(indiceDesapilado, 2, armarIndiceI(indiceActual));
+				sacar_de_pila(&pila_condicion_doble, &indiceDesapilado);
+				modificarTerceto(indiceDesapilado, 2, armarIndiceI(indiceActual));
+			}
+			if(strcmp(condicion,"OR") == 0)
+			{
+				sacar_de_pila(&pila_condicion_doble, &indiceDesapilado);
+				modificarTerceto(indiceDesapilado, 2, armarIndiceI(indiceActual));
+				sacar_de_pila(&pila_condicion_doble, &indiceDesapilado);
+				modificarTerceto(indiceDesapilado, 2, armarIndiceI(indiceComparador+1));
+			}
+		}
+	}
 	|
 	IF CAR_PA condicion CAR_PC THEN
 	bloque {printf("\t\tIF\n");}
-	ELSE {printf("\t\tELSE\n");}
+	ELSE
+	{
+		printf("\t\tELSE\n");
+		int indiceDesapilado;
+		int indiceActual = obtenerIndiceActual();
+		if(pila_vacia(&pila_condicion_doble) == PILA_VACIA)
+		{
+			sacar_de_pila(&pila, &indiceDesapilado);
+			modificarTerceto(indiceDesapilado, 2, armarIndiceI(indiceActual+1));
+		}
+		else
+		{
+			if(strcmp(condicion,"AND") == 0)
+			{
+				sacar_de_pila(&pila_condicion_doble, &indiceDesapilado);
+				modificarTerceto(indiceDesapilado, 2, armarIndiceI(indiceActual+1));
+				sacar_de_pila(&pila_condicion_doble, &indiceDesapilado);
+				modificarTerceto(indiceDesapilado, 2, armarIndiceI(indiceActual+1));
+			}
+			if(strcmp(condicion,"OR") == 0)
+			{
+				sacar_de_pila(&pila_condicion_doble, &indiceDesapilado);
+				modificarTerceto(indiceDesapilado, 2, armarIndiceI(indiceActual+1));
+				sacar_de_pila(&pila_condicion_doble, &indiceDesapilado);
+				modificarTerceto(indiceDesapilado, 2, armarIndiceI(indiceComparador+1));
+			}
+		}
+		indiceAux = crearTerceto("JMP","_","_");
+		poner_en_pila(&pila, &indiceAux);
+
+		startEtiqueta = 0;
+	}
 	bloque
-	ENDIF {printf("\t\tENDIF\n");} ;
+	ENDIF
+	 {
+		printf("\t\tENDIF (con else)\n");
+		int indiceDesapilado;
+		int indiceActual = obtenerIndiceActual();
+		sacar_de_pila(&pila, &indiceDesapilado);
+		modificarTerceto(indiceDesapilado, 2, armarIndiceI(indiceActual));
+	}	;
+
 
 condicion:
 			comparacion
+			{
+				printf("\t\tCOMPARACION\n");
+
+				startEtiqueta = 0;
+			}
 			| OP_NOT comparacion
 			{	printf("\t\tCONDICION NOT\n");
+				char *operador = obtenerTerceto(indiceComparador,1);
+				char *operadorNegado = negarComparador(operador);
+				modificarTerceto(indiceComparador,1,operadorNegado);
+
+				startEtiqueta = 0;
 			}
-			| comparacion OP_AND comparacion
-			{	printf("\t\tCONDICION DOBLE AND\n");
+			| comparacion { indiceComparador1 = indiceComparador; } OP_AND comparacion
+			{
+				printf("\t\tCONDICION DOBLE AND\n");
+				indiceComparador2 = indiceComparador;
+				strcpy(condicion, "AND");
+				poner_en_pila(&pila_condicion_doble,&indiceComparador1);
+				poner_en_pila(&pila_condicion_doble,&indiceComparador2);
+
+				startEtiqueta = 0;
 			}
-			| comparacion OP_OR comparacion
-			{	printf("\t\tCONDICION DOBLE OR\n");
+			| comparacion
+					{
+						indiceComparador1 = indiceComparador;
+						char *operador = obtenerTerceto(indiceComparador1,1);
+						char *operadorNegado = negarComparador(operador);
+						modificarTerceto(indiceComparador1,1,operadorNegado);
+						startEtiqueta = 0;
+				}
+		OP_OR comparacion
+		{
+				printf("\t\tCONDICION DOBLE OR\n");
+				indiceComparador2 = indiceComparador;
+				strcpy(condicion, "OR");
+				poner_en_pila(&pila_condicion_doble,&indiceComparador1);
+				poner_en_pila(&pila_condicion_doble,&indiceComparador2);
+
+				startEtiqueta = 0;
 			}	;
 
 comparacion:
-	   		expresion comparador expresion;
+	   		expresion { indiceIzq = indiceExpresion; } comparador expresion
+				{
+				compararTipos();
+				indiceDer = indiceExpresion;
+				crearTerceto("CMP",armarIndiceI(indiceIzq),armarIndiceD(indiceDer));
+				char comparadorDesapilado[8];
+				sacar_de_pila(&pila, &comparadorDesapilado);
+				indiceComparador = crearTerceto(comparadorDesapilado,"_","_");
+				poner_en_pila(&pila,&indiceComparador);
+			};
 
 comparador:
-	CMP_MAYOR
-	| CMP_MENOR
+			CMP_MAYOR
+				{
+					// char comparadorApilado[8] = "BLE";
+					char comparadorApilado[8] = "JA";
+					poner_en_pila(&pila,&comparadorApilado);
+				}
+				| CMP_MENOR
+				{
+					// char comparadorApilado[8] = "BGE";
+					char comparadorApilado[8] = "JB";
+					poner_en_pila(&pila,&comparadorApilado);
+				}
+				| CMP_MAYORIGUAL
+				{
+					// char comparadorApilado[8] = "BLT";
+					char comparadorApilado[8] = "JAE";
+					poner_en_pila(&pila,&comparadorApilado);
+				}
+				| CMP_MENORIGUAL
+				{
+					// char comparadorApilado[8] = "BGT";
+					char comparadorApilado[8] = "JBE";
+					poner_en_pila(&pila,&comparadorApilado);
+				}
+				| CMP_IGUAL
+				{
+					// char comparadorApilado[8] = "BNE";
+					char comparadorApilado[8] = "JE";
+					poner_en_pila(&pila,&comparadorApilado);
+				}
+				| CMP_DISTINTO
+				{
+					// char comparadorApilado[8] = "BEQ";
+					char comparadorApilado[8] = "JNE";
+					poner_en_pila(&pila,&comparadorApilado);
+				} ;
 
-	| CMP_MAYORIGUAL
+			expresion:
+				termino	{	indiceExpresion = indiceTermino;	}
+				| expresion OP_SUM termino
+				{
+					indiceExpresion = crearTerceto("+",armarIndiceI(indiceExpresion),armarIndiceD(indiceTermino));
+				}
+				| expresion OP_RES termino
+				{
+					indiceExpresion = crearTerceto("-",armarIndiceI(indiceExpresion),armarIndiceD(indiceTermino));
+				};
 
-	| CMP_MENORIGUAL
+			termino:
+				factor	{	indiceTermino = indiceFactor;	}
+				| termino OP_MUL factor
+				{
+					indiceTermino = crearTerceto("*",armarIndiceI(indiceTermino),armarIndiceD(indiceFactor));
+				}
+				| termino OP_DIV factor
+				{
+					indiceTermino = crearTerceto("/",armarIndiceI(indiceTermino),armarIndiceD(indiceFactor));
+				}	;
 
-	| CMP_IGUAL
-
-	| CMP_DISTINTO;
-
-expresion:
-	termino
-	| expresion OP_SUM termino
-
-	| expresion OP_RES termino;
-
-termino:
-	factor
-	| termino OP_MUL factor
-
-	| termino OP_DIV factor;
-
-factor:
-	ID
-	| CONST_INT
-
-	| CONST_REAL
-
-	| CONST_STR
-
-	| CAR_PA expresion CAR_PC;
+			factor:
+				ID
+				{
+					if(startEtiqueta == 0)
+					{
+						crearTerceto(obtenerNuevoNombreEtiqueta("inicio"),"_","_");
+						startEtiqueta = 1;
+					}
+					insertarEnArrayComparacionTipos(yylval.str_val);
+					indiceFactor = crearTerceto(yylval.str_val,"_","_");
+				}
+				| CONST_INT
+				{
+					if(startEtiqueta == 0)
+					{
+						crearTerceto(obtenerNuevoNombreEtiqueta("inicio"),"_","_");
+						startEtiqueta = 1;
+					}
+					insertarEnArrayComparacionTipos(yylval.str_val);
+					indiceFactor = crearTerceto(yylval.str_val,"_","_");
+				}
+				| CONST_REAL
+				{
+					if(startEtiqueta == 0)
+					{
+						crearTerceto(obtenerNuevoNombreEtiqueta("inicio"),"_","_");
+						startEtiqueta = 1;
+					}
+					insertarEnArrayComparacionTipos(yylval.str_val);
+					indiceFactor = crearTerceto(yylval.str_val,"_","_");
+				}
+				| CONST_STR
+				{
+					if(startEtiqueta == 0)
+					{
+						crearTerceto(obtenerNuevoNombreEtiqueta("inicio"),"_","_");
+						startEtiqueta = 1;
+					}
+					insertarEnArrayComparacionTipos(yylval.str_val);
+					indiceFactor = crearTerceto(yylval.str_val,"_","_");
+				}
+				| CAR_PA expresion CAR_PC;
 
 %%
 
@@ -238,4 +521,138 @@ int yyerror(char *msg)
     fflush(stderr);
     fprintf(stderr, "\n\n--- ERROR EN COMPILACION ---\nEn linea %d: %s.\n\n", yylineno, msg);
     exit(1);
+}
+
+void insertarEnArrayDeclaracion(char * val)
+{
+    char * aux = (char *) malloc(sizeof(char) * (strlen(val) + 1));
+    strcpy(aux, val);
+    arrayDeclaraciones[longitud_arrayDeclaraciones] = aux;
+    longitud_arrayDeclaraciones++;
+}
+
+void validarDeclaracionTipoDato(char * tipo)
+{
+	int i;
+	for (i=0; i < longitud_arrayDeclaraciones; i++)
+	{
+		if(existeTokenEnTS(arrayDeclaraciones[i]) == NO_EXISTE)
+		{
+			insertarTokenEnTS(tipo,arrayDeclaraciones[i]);
+		}
+		else
+		{
+			char msg[300];
+			sprintf(msg, "ERROR en etapa GCI - Variable \'%s\' ya declarada", arrayDeclaraciones[i]);
+			yyerror(msg);
+		}
+	}
+	// Reinicio el contador para leer otro tipo de dato
+	longitud_arrayDeclaraciones = 0;
+}
+
+char * negarComparador(char* comparador)
+{
+	if(strcmp(comparador,"JA") == 0)
+		return "JBE";
+	if(strcmp(comparador,"JB") == 0)
+		return "JAE";
+	if(strcmp(comparador,"JNB") == 0)
+		return "JB";
+	if(strcmp(comparador,"JBE") == 0)
+		return "JA";
+	if(strcmp(comparador,"JE") == 0)
+		return "JNE";
+	if(strcmp(comparador,"JNE") == 0)
+		return "JE";
+	return NULL;
+}
+
+char * obtenerNuevoNombreEtiqueta(char * val)
+{
+	static char nombreEtiqueta[50];
+	int indiceActualTerceto = obtenerIndiceActual();
+	sprintf(nombreEtiqueta, "ETIQ_%s_%d", val, indiceActualTerceto);
+	return nombreEtiqueta;
+}
+
+void insertarEnArrayComparacionTipos(char * val)
+{
+	// Primero corroboramos existencia del token en la tabla de simbolos
+	if(existeTokenEnTS(yylval.str_val) == NO_EXISTE)
+	{
+		char msg[300];
+		sprintf(msg, "ERROR en etapa GCI - Variable \'%s\' no declarada en la seccion declaracion", yylval.str_val);
+		yyerror(msg);
+	}
+
+	// Luego insertamos el tipo de token en nuestro array
+	char * tipo = recuperarTipoTS(val);
+	tipo = tipoConstanteConvertido(tipo);
+    char * aux = (char *) malloc(sizeof(char) * (strlen(tipo) + 1));
+	strcpy(aux, tipo);
+    arrayComparacionTipos[longitud_arrayComparacionTipos] = aux;
+    longitud_arrayComparacionTipos++;
+}
+
+void insertarEnArrayComparacionTiposDirecto(char * tipo)
+{
+    char * aux = (char *) malloc(sizeof(char) * (strlen(tipo) + 1));
+	strcpy(aux, tipo);
+    arrayComparacionTipos[longitud_arrayComparacionTipos] = aux;
+    longitud_arrayComparacionTipos++;
+}
+
+void imprimirArrayComparacionTipos()
+{
+	printf("\n ARRAY DE TIPOS: ");
+	int i;
+	for (i=0; i < longitud_arrayComparacionTipos; i++)
+	{
+		printf("\n %s ", arrayComparacionTipos[i]);
+	}
+}
+
+void compararTipos()
+{
+	// imprimirArrayComparacionTipos();
+	char* tipoBase = arrayComparacionTipos[0];
+	int i;
+	for (i=1; i < longitud_arrayComparacionTipos; i++)
+	{
+		char* tipoAComparar = arrayComparacionTipos[i];
+		if(strcmp(tipoBase, tipoAComparar) != 0)
+		{
+			char msg[300];
+		    sprintf(msg, "ERROR en etapa GCI - Tipo de datos incompatibles. Tipo 1: \'%s\' Tipo 2: \'%s\'", tipoBase, tipoAComparar);
+			yyerror(msg);
+		}
+	}
+	longitud_arrayComparacionTipos = 0;
+}
+
+char * tipoConstanteConvertido(char* tipoVar)
+{
+	if(strcmp(tipoVar, "INTEGER") != 0 && strcmp(tipoVar, "REAL") != 0 && strcmp(tipoVar, "STRING") != 0)
+	{
+		if(strcmp(tipoVar, "CONST_INT") == 0)
+		{
+			return "INTEGER";
+		}
+		else
+			if(strcmp(tipoVar, "CONST_REAL") == 0)
+			{
+				return "REAL";
+			}
+			else
+				if(strcmp(tipoVar, "CONST_STR") == 0)
+				{
+					return "STRING";
+				}
+				else
+				{
+					return NULL;
+				}
+	}
+	return tipoVar;
 }
