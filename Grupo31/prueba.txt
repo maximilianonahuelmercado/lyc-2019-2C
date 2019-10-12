@@ -9,13 +9,8 @@ VAR
 [int, float, string]:[a, b, c]
 ENDVAR
 
-
---/Asignaciones/--
-
-a:=b
-
 --/Repeat/--
-REPEAT(a >= b)	
+REPEAT(a > b)	
 	c:=a+5
 ENDREPEAT
 

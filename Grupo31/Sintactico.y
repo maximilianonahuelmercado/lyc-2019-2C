@@ -113,6 +113,7 @@ programa:
 	{	printf("\tInicia el COMPILADOR\n\n");	}
 	est_declaracion bloque
 	{	printf("\n\tFin COMPILADOR OK\n");
+		prepararTSParaAssembler();
 		crearArchivoTS();
 		crearArchivoTercetosIntermedia();
 	}	;
@@ -126,9 +127,9 @@ declaracion:
 	CAR_CA NODO CAR_CC;
 
 NODO:
-	TIPO_DATO CAR_CC OP_DOSP CAR_CA ID;
+	TIPO_DATO CAR_CC OP_DOSP CAR_CA ID {insertarEnArrayDeclaracion(yylval.str_val);};
 NODO:
-	TIPO_DATO CAR_COMA NODO CAR_COMA ID;
+	TIPO_DATO CAR_COMA NODO CAR_COMA ID {insertarEnArrayDeclaracion(yylval.str_val);};
 TIPO_DATO:
 	INTEGER {	validarDeclaracionTipoDato("INTEGER");	} | REAL {	validarDeclaracionTipoDato("REAL");	} | STRING {	validarDeclaracionTipoDato("STRING");	};
 
@@ -154,14 +155,17 @@ sentencia:
 ciclo:
 	REPEAT
 	{	printf("\t\tREPEAT\n");
-		indiceAux=crearTerceto(obtenerNuevoNombreEtiqueta("inicio_repeat"),"_","_");
-		poner_en_pila(&pila,&indiceAux);
+		//indiceAux=crearTerceto(obtenerNuevoNombreEtiqueta("inicio_repeat"),"_","_");
+		//poner_en_pila(&pila,&indiceAux);
 	}
+	{printf("\t\tPASA REPEAT\n");}
 	CAR_PA condicion CAR_PC
 	{
-		indicePrincipioBloque = obtenerIndiceActual();
+		printf("\t\tPASA CONDICION\n");
+		//indicePrincipioBloque = obtenerIndiceActual();
 	}
 	bloque
+	{printf("\t\tPASA BLOQUE\n");}
 	ENDREPEAT
 	{	printf("\t\tENDREPEAT\n");
 	int indiceDesapilado;
@@ -384,8 +388,10 @@ condicion:
 			}	;
 
 comparacion:
-	   		expresion { indiceIzq = indiceExpresion; } comparador expresion
+				{printf("\t\tENTRO COMPARAXION\n");}
+	   		expresion comparador expresion
 				{
+				{printf("\t\tENTRO COMPARADOR\n");}
 				compararTipos();
 				indiceDer = indiceExpresion;
 				crearTerceto("CMP",armarIndiceI(indiceIzq),armarIndiceD(indiceDer));
@@ -398,7 +404,8 @@ comparacion:
 comparador:
 			CMP_MAYOR
 				{
-					// char comparadorApilado[8] = "BLE";
+					printf("\t\tENTRO A COMPARADOR");
+					//char comparadorApilado[8] = "BLE";
 					char comparadorApilado[8] = "JA";
 					poner_en_pila(&pila,&comparadorApilado);
 				}
@@ -434,18 +441,22 @@ comparador:
 				} ;
 
 			expresion:
-				termino	{	indiceExpresion = indiceTermino;	}
+				{printf("\t\tENTRO A EXPRESOPM");}
+				termino	//{	indiceExpresion = indiceTermino;	}
+				{printf("\t\tPASO TERMINO");}
 				| expresion OP_SUM termino
 				{
-					indiceExpresion = crearTerceto("+",armarIndiceI(indiceExpresion),armarIndiceD(indiceTermino));
+					//indiceExpresion = crearTerceto("+",armarIndiceI(indiceExpresion),armarIndiceD(indiceTermino));
 				}
 				| expresion OP_RES termino
 				{
-					indiceExpresion = crearTerceto("-",armarIndiceI(indiceExpresion),armarIndiceD(indiceTermino));
+					//indiceExpresion = crearTerceto("-",armarIndiceI(indiceExpresion),armarIndiceD(indiceTermino));
 				};
 
 			termino:
-				factor	{	indiceTermino = indiceFactor;	}
+			  {printf("\t\tENTRO TERMINO");}
+				factor	//{	indiceTermino = indiceFactor;	}
+				{printf("\t\tPASO FACTOR");}
 				| termino OP_MUL factor
 				{
 					indiceTermino = crearTerceto("*",armarIndiceI(indiceTermino),armarIndiceD(indiceFactor));
@@ -456,8 +467,9 @@ comparador:
 				}	;
 
 			factor:
+				{printf("\t\tENTRO FACTOR\n");}
 				ID
-				{
+				{ printf("\t\tENTRO ID\n");
 					if(startEtiqueta == 0)
 					{
 						crearTerceto(obtenerNuevoNombreEtiqueta("inicio"),"_","_");
@@ -465,6 +477,8 @@ comparador:
 					}
 					insertarEnArrayComparacionTipos(yylval.str_val);
 					indiceFactor = crearTerceto(yylval.str_val,"_","_");
+					printf("\t\tSALIO ID\n");
+
 				}
 				| CONST_INT
 				{
@@ -526,6 +540,7 @@ int yyerror(char *msg)
 void insertarEnArrayDeclaracion(char * val)
 {
     char * aux = (char *) malloc(sizeof(char) * (strlen(val) + 1));
+		printf("VALORRRR:  %s\n",val);
     strcpy(aux, val);
     arrayDeclaraciones[longitud_arrayDeclaraciones] = aux;
     longitud_arrayDeclaraciones++;
@@ -578,21 +593,27 @@ char * obtenerNuevoNombreEtiqueta(char * val)
 
 void insertarEnArrayComparacionTipos(char * val)
 {
+	printf("VAL:  %s\n",val);
 	// Primero corroboramos existencia del token en la tabla de simbolos
 	if(existeTokenEnTS(yylval.str_val) == NO_EXISTE)
 	{
+		printf("\t\tENTRO EN IF");
 		char msg[300];
 		sprintf(msg, "ERROR en etapa GCI - Variable \'%s\' no declarada en la seccion declaracion", yylval.str_val);
 		yyerror(msg);
 	}
-
+  printf("\t\tSALIO DEL IF");
 	// Luego insertamos el tipo de token en nuestro array
 	char * tipo = recuperarTipoTS(val);
+	printf("DEVOLUCION DE LA FUNCION recuperarTipoTS:  %s\n",tipo);
 	tipo = tipoConstanteConvertido(tipo);
-    char * aux = (char *) malloc(sizeof(char) * (strlen(tipo) + 1));
+	printf("\t\tSALIO DE CONSTANTE");
+	printf("DEVOLUCION DE LA FUNCION tipoConstanteConvertido: %s\n",tipo);
+	char * aux = (char *) malloc(sizeof(strlen(tipo) + 1));
 	strcpy(aux, tipo);
-    arrayComparacionTipos[longitud_arrayComparacionTipos] = aux;
-    longitud_arrayComparacionTipos++;
+	printf("DEVOLUCION DE ASIGNACION DE AUX : %s\n",aux);
+  arrayComparacionTipos[longitud_arrayComparacionTipos] = aux;
+  longitud_arrayComparacionTipos++;
 }
 
 void insertarEnArrayComparacionTiposDirecto(char * tipo)
