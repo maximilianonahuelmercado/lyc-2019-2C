@@ -105,7 +105,7 @@ read|READ    			    {	return READ;	    }
 						        return ID;
 					        } else {
                                 char msg[300];
-                                sprintf(msg, "ERROR Lexico - ID: \'%s\' demasiado largo. Maximo de 20 caracteres y contiene: %d", yytext, cantCaracteres);
+                                sprintf(msg, "ERROR Lexico - ID: \'%s\' demasiado largo. Maximo de 30 caracteres y contiene: %d", yytext, cantCaracteres);
 								yyerror(msg);
 					        }
                         }

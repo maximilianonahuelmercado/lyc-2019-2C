@@ -27,6 +27,7 @@
 		char * tipoConstanteConvertido(char*);
 		void insertarEnArrayTercetos(char *operador, char *operando1, char *operando2);
 		void crearTercetosDelArray();
+		void guardarTipoDato(char *);
 
 		// Declaro la pila (estructura externa que me servira para resolver GCI)
 		t_pila pila;
@@ -36,6 +37,7 @@
 
 		// Arrays
 		char * arrayDeclaraciones[100];	// array para declaraciones
+		char tipoDato;
 		int longitud_arrayDeclaraciones = 0; // incremento en el array arrayDeclaraciones
 		char * arrayComparacionTipos[100];	// array para comparar tipos
 		int longitud_arrayComparacionTipos = 0; // incremento en el array arrayComparacionTipos
@@ -127,11 +129,52 @@ declaracion:
 	CAR_CA NODO CAR_CC;
 
 NODO:
-	TIPO_DATO CAR_CC OP_DOSP CAR_CA ID {insertarEnArrayDeclaracion(yylval.str_val);};
+TIPO_DATO CAR_CC OP_DOSP CAR_CA ID
+{
+	insertarEnArrayDeclaracion(yylval.str_val);
+	printf("\nArray declaraciones: %s", arrayDeclaraciones[0]);
+	if(strcmp(tipoDato, "INTEGER") == 0)
+	{
+		validarDeclaracionTipoDato("INTEGER");
+	}
+	else{
+			if(strcmp(tipoDato, "REAL") == 0)
+				validarDeclaracionTipoDato("REAL");
+			else
+				validarDeclaracionTipoDato("STRING");
+	}
+
+};
 NODO:
-	TIPO_DATO CAR_COMA NODO CAR_COMA ID {insertarEnArrayDeclaracion(yylval.str_val);};
+	TIPO_DATO CAR_COMA NODO CAR_COMA ID
+	{
+		printf("\nArray declaraciones: %s", arrayDeclaraciones[0]);
+		insertarEnArrayDeclaracion(yylval.str_val);
+		if(strcmp(tipoDato, "INTEGER") == 0)
+		{
+			validarDeclaracionTipoDato("INTEGER");
+		}
+		else{
+				if(strcmp(tipoDato, "REAL") == 0)
+					validarDeclaracionTipoDato("REAL");
+				else
+					validarDeclaracionTipoDato("STRING");
+		}
+
+	};
+
 TIPO_DATO:
-	INTEGER {	validarDeclaracionTipoDato("INTEGER");	} | REAL {	validarDeclaracionTipoDato("REAL");	} | STRING {	validarDeclaracionTipoDato("STRING");	};
+	INTEGER {
+		guardarTipoDato("INTEGER");
+	}
+	| REAL{
+		guardarTipoDato("REAL");
+	}
+
+	| STRING {
+		guardarTipoDato("INTEGER");
+	};
+
 
 bloque:
 	sentencia
@@ -474,7 +517,9 @@ comparador:
 					{
 						crearTerceto(obtenerNuevoNombreEtiqueta("inicio"),"_","_");
 						startEtiqueta = 1;
+						printf("\t\t\tID crear terceto paso\n");
 					}
+					printf("\t\tPto COntrol\n");
 					insertarEnArrayComparacionTipos(yylval.str_val);
 					indiceFactor = crearTerceto(yylval.str_val,"_","_");
 					printf("\t\tSALIO ID\n");
@@ -546,6 +591,12 @@ void insertarEnArrayDeclaracion(char * val)
     longitud_arrayDeclaraciones++;
 }
 
+void guardarTipoDato( char * val)
+{
+	char * aux = (char *) malloc(sizeof(char) * (strlen(val) + 1));
+	strcpy(aux, val);
+	tipoDato = aux;
+}
 void validarDeclaracionTipoDato(char * tipo)
 {
 	int i;
@@ -595,6 +646,7 @@ void insertarEnArrayComparacionTipos(char * val)
 {
 	printf("VAL:  %s\n",val);
 	// Primero corroboramos existencia del token en la tabla de simbolos
+	
 	if(existeTokenEnTS(yylval.str_val) == NO_EXISTE)
 	{
 		printf("\t\tENTRO EN IF");
