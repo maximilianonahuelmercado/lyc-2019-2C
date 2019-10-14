@@ -196,11 +196,17 @@ ciclo:
 
 modulo:
 	expresion MOD expresion
-	{ printf("\t\tMOD\n");};
+	{ 
+		printf("\t\tMOD\n");
+		indiceModulo = crearTerceto("MOD",armarIndiceI(indiceExpresion),armarIndiceD(indiceExpresion));
+	};
 
 division:
 	expresion DIV expresion
-	{ printf("\t\tDIV\n");};
+	{ 
+		printf("\t\tDIV\n");
+		indiceModulo = crearTerceto("DIV",armarIndiceI(indiceExpresion),armarIndiceD(indiceExpresion));	
+	};
 
 inlist:
 	{printf("\t\tINLIST\n");}
