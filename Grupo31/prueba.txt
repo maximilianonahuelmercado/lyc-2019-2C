@@ -6,11 +6,11 @@
 --/Declaraciones/--
 
 VAR
-[int, float, string]:[a, b, c]
+[string, int, float, string, int, int, int, float]:[k, a, b, c, i, j, w, p]
 ENDVAR
 
 --/Repeat/--
-REPEAT(a > b)	
+REPEAT(a > b)
 	c:=a+5
 ENDREPEAT
 
@@ -32,7 +32,7 @@ IF(i==15 AND a==4)THEN
 ELSE
 	IF(j==2 OR w==7)THEN
 	i:=32
-	cd:=44
+	j:=44
 	ENDIF
 ENDIF
 

@@ -1,0 +1,23 @@
+Nombre                        Tipo        Valor                         Longitud    
+k                             INTEGER     
+a                             INTEGER     
+b                             INTEGER     
+c                             INTEGER     
+i                             INTEGER     
+j                             INTEGER     
+w                             INTEGER     
+&cte1                        CONST_INT   5                                         
+&cte2                        CONST_INT   15                                        
+&cte3                        CONST_INT   4                                         
+&cte4                        CONST_INT   16                                        
+&cte5                        CONST_INT   32                                        
+&cte6                        CONST_INT   2                                         
+&cte7                        CONST_INT   7                                         
+&cte8                        CONST_INT   44                                        
+&cte9                        CONST_REAL  2.3                                       
+&cte10                       CONST_REAL  1.22                                      
+&cte11                       CONST_STR   "HOLA"                        6           
+&cte12                       CONST_STR   "hello"                       7           
+&cte13                       CONST_STR   "HOLA fdf 6543 mm"            18          
+&cte14                       CONST_STR   "mundo"                       7           
+&cte15                       CONST_STR   "world"                       7           
