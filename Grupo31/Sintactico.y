@@ -35,10 +35,14 @@
 		t_pila pila_ciclo_especial;
 		char condicion[5]; // puede ser AND u OR
 
+		t_pila pilaTipo;
+
+
 		// Arrays
 		char * arrayDeclaraciones[100];	// array para declaraciones
-		char * tipoDato;
+		char * arrayTipoDato[100]; // array para tipos de dato
 		int longitud_arrayDeclaraciones = 0; // incremento en el array arrayDeclaraciones
+		int longitud_arrayTipoDato = 0; // incremento en el arrayTipoDato
 		char * arrayComparacionTipos[100];	// array para comparar tipos
 		int longitud_arrayComparacionTipos = 0; // incremento en el array arrayComparacionTipos
 		// Auxiliar para manejar tercetos;
@@ -47,6 +51,7 @@
 		indiceId;
 		int indicePrincipioBloque;
 		char idAsignarStr[50];
+		char * tipoDato;
 
 		int startEtiqueta = 0;
 %}
@@ -132,6 +137,7 @@ NODO:
 TIPO_DATO CAR_CC OP_DOSP CAR_CA ID
 {
 	insertarEnArrayDeclaracion(yylval.str_val);
+  sacar_de_pila(&pilaTipo,&tipoDato);
 	printf("\nArray declaraciones: %s , TIPO DE DATO %s", arrayDeclaraciones[0], tipoDato);
 	if(strcmp(tipoDato, "STRING") == 0)
 	{
@@ -165,16 +171,19 @@ NODO:
 
 TIPO_DATO:
 	STRING {
-	tipoDato = guardarTipoDato("STRING");
+	guardarTipoDato("STRING");
+	poner_en_pila(&pilaTipo,tipoDato);
 	printf("ENTRE A STRING %s\n", tipoDato);
 	}
 	|
 	INTEGER {
-		tipoDato = guardarTipoDato("INTEGER");
+		guardarTipoDato("INTEGER");
+		poner_en_pila(&pilaTipo,tipoDato);
 		printf("ENTRE A ENTERO %s\n", tipoDato);
 	}
 	| REAL{
-		tipoDato = guardarTipoDato("REAL");
+		guardarTipoDato("REAL");
+		poner_en_pila(&pilaTipo,tipoDato);
 		printf("ENTRE A REAL %s\n", tipoDato);
 	};
 
@@ -594,12 +603,11 @@ void insertarEnArrayDeclaracion(char * val)
     longitud_arrayDeclaraciones++;
 }
 
-char * guardarTipoDato( char * val)
+char * guardarTipoDato(char * val)
 {
 	char * aux = (char *) malloc(sizeof(char) * (strlen(val) + 1));
 	strcpy(aux, val);
 	tipoDato = aux;
-	return tipoDato;
 }
 void validarDeclaracionTipoDato(char * tipo)
 {
