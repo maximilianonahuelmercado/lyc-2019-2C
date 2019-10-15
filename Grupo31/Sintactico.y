@@ -27,15 +27,17 @@
 		char * tipoConstanteConvertido(char*);
 		void insertarEnArrayTercetos(char *operador, char *operando1, char *operando2);
 		void crearTercetosDelArray();
-		char * guardarTipoDato(char *);
+		void guardarTipoDato(char *);
+
 
 		// Declaro la pila (estructura externa que me servira para resolver GCI)
 		t_pila pila;
 		t_pila pila_condicion_doble;
 		t_pila pila_ciclo_especial;
+		t_pila pilaDatos;
+		t_pila pilaDatosInversa;
 		char condicion[5]; // puede ser AND u OR
 
-		t_pila pilaTipo;
 
 
 		// Arrays
@@ -45,13 +47,15 @@
 		int longitud_arrayTipoDato = 0; // incremento en el arrayTipoDato
 		char * arrayComparacionTipos[100];	// array para comparar tipos
 		int longitud_arrayComparacionTipos = 0; // incremento en el array arrayComparacionTipos
+		char * tipoDato[100];
+
 		// Auxiliar para manejar tercetos;
 		int indiceExpresion, indiceTermino, indiceFactor, indiceLongitud;
 		int indiceAux, indiceUltimo, indiceIzq, indiceDer, indiceComparador, indiceComparador1, indiceComparador2,
 		indiceId;
 		int indicePrincipioBloque;
 		char idAsignarStr[50];
-		char * tipoDato;
+
 
 		int startEtiqueta = 0;
 %}
@@ -117,7 +121,10 @@
 %%
 
 programa:
-	{	printf("\tInicia el COMPILADOR\n\n");	}
+	{	printf("\tInicia el COMPILADOR\n\n");
+		crear_pila(&pilaDatos);
+	}
+
 	est_declaracion bloque
 	{	printf("\n\tFin COMPILADOR OK\n");
 		prepararTSParaAssembler();
@@ -136,55 +143,77 @@ declaracion:
 NODO:
 TIPO_DATO CAR_CC OP_DOSP CAR_CA ID
 {
+	//printf("\nArray declaraciones: %s , TIPO DE DATO %s", arrayDeclaraciones[0], tipoDato);
 	insertarEnArrayDeclaracion(yylval.str_val);
-  sacar_de_pila(&pilaTipo,&tipoDato);
-	printf("\nArray declaraciones: %s , TIPO DE DATO %s", arrayDeclaraciones[0], tipoDato);
+	if(pila_vacia(&pilaDatos)  != PILA_VACIA)
+	{
+
+		sacar_de_pila(&pilaDatos, &tipoDato);
+		printf("\t\tTIPO DATO: %s\n", tipoDato);
 	if(strcmp(tipoDato, "STRING") == 0)
 	{
+
 		validarDeclaracionTipoDato("STRING");
 	}
 	else{
 			if(strcmp(tipoDato, "REAL") == 0)
-				validarDeclaracionTipoDato("REAL");
-			else
-				validarDeclaracionTipoDato("INTEGER");
-	}
+			 	{
 
+						validarDeclaracionTipoDato("REAL");
+				}
+
+			else{
+
+				validarDeclaracionTipoDato("INTEGER");
+			}
+	}
+}
 };
 NODO:
 	TIPO_DATO CAR_COMA NODO CAR_COMA ID
 	{
-		printf("\nArray declaraciones: %s , TIPO DE DATO %s", arrayDeclaraciones[0], tipoDato);
-		insertarEnArrayDeclaracion(yylval.str_val);
-		if(strcmp(tipoDato, "STRING") == 0)
-		{
-			validarDeclaracionTipoDato("STRING");
-		}
-		else{
-				if(strcmp(tipoDato, "REAL") == 0)
-					validarDeclaracionTipoDato("REAL");
-				else
-					validarDeclaracionTipoDato("INTEGER");
-		}
+	insertarEnArrayDeclaracion(yylval.str_val);
+	if(pila_vacia(&pilaDatos)  != PILA_VACIA)
+	{
 
-	};
+		sacar_de_pila(&pilaDatos, &tipoDato);
+		printf("\t\tTIPO DATO: %s\n", tipoDato);
+
+
+
+	if(strcmp(tipoDato, "STRING") == 0)
+	{
+
+		validarDeclaracionTipoDato("STRING");
+	}
+	else{
+			if(strcmp(tipoDato, "REAL") == 0)
+			 	{
+
+						validarDeclaracionTipoDato("REAL");
+				}
+
+			else{
+
+				validarDeclaracionTipoDato("INTEGER");
+			}
+	}
+}
+};
 
 TIPO_DATO:
+
 	STRING {
-	guardarTipoDato("STRING");
-	poner_en_pila(&pilaTipo,tipoDato);
-	printf("ENTRE A STRING %s\n", tipoDato);
+	poner_en_pila(&pilaDatos, "STRING");
 	}
 	|
 	INTEGER {
-		guardarTipoDato("INTEGER");
-		poner_en_pila(&pilaTipo,tipoDato);
-		printf("ENTRE A ENTERO %s\n", tipoDato);
+	 poner_en_pila(&pilaDatos, "INTEGER");
+
 	}
 	| REAL{
-		guardarTipoDato("REAL");
-		poner_en_pila(&pilaTipo,tipoDato);
-		printf("ENTRE A REAL %s\n", tipoDato);
+		poner_en_pila(&pilaDatos, "REAL");
+
 	};
 
 
@@ -597,20 +626,16 @@ int yyerror(char *msg)
 void insertarEnArrayDeclaracion(char * val)
 {
     char * aux = (char *) malloc(sizeof(char) * (strlen(val) + 1));
-		printf("VALORRRR:  %s\n",val);
     strcpy(aux, val);
     arrayDeclaraciones[longitud_arrayDeclaraciones] = aux;
+		printf("\t\t\tArrayDeclaraciones: %s\n", arrayDeclaraciones[longitud_arrayDeclaraciones]);
     longitud_arrayDeclaraciones++;
 }
 
-char * guardarTipoDato(char * val)
-{
-	char * aux = (char *) malloc(sizeof(char) * (strlen(val) + 1));
-	strcpy(aux, val);
-	tipoDato = aux;
-}
+
 void validarDeclaracionTipoDato(char * tipo)
 {
+	printf("ENTRE A validarDeclaracionTipoDato\n");
 	int i;
 	for (i=0; i < longitud_arrayDeclaraciones; i++)
 	{
