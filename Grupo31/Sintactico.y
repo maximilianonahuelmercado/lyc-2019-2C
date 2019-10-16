@@ -7,6 +7,7 @@
 	#include "files_h/constantes.h"
 	#include "files_h/ts.h"
 	#include "files_h/pila.h"
+	#include "files_h/cola.h"
 
 	// Declaraciones onbligatorias para quitar advertencias
 	int yylineno;
@@ -37,6 +38,8 @@
 		t_pila pilaDatos;
 		t_pila pilaDatosInversa;
 		char condicion[5]; // puede ser AND u OR
+
+		t_cola cola;
 
 
 
@@ -122,7 +125,7 @@
 
 programa:
 	{	printf("\tInicia el COMPILADOR\n\n");
-		crear_pila(&pilaDatos);
+		crear_cola(&cola);
 	}
 
 	est_declaracion bloque
@@ -145,10 +148,10 @@ TIPO_DATO CAR_CC OP_DOSP CAR_CA ID
 {
 	//printf("\nArray declaraciones: %s , TIPO DE DATO %s", arrayDeclaraciones[0], tipoDato);
 	insertarEnArrayDeclaracion(yylval.str_val);
-	if(pila_vacia(&pilaDatos)  != PILA_VACIA)
+	if(cola_vacia(&cola) != COLA_VACIA)
 	{
 
-		sacar_de_pila(&pilaDatos, &tipoDato);
+		sacar_de_cola(&cola, &tipoDato);
 		printf("\t\tTIPO DATO: %s\n", tipoDato);
 	if(strcmp(tipoDato, "STRING") == 0)
 	{
@@ -173,10 +176,10 @@ NODO:
 	TIPO_DATO CAR_COMA NODO CAR_COMA ID
 	{
 	insertarEnArrayDeclaracion(yylval.str_val);
-	if(pila_vacia(&pilaDatos)  != PILA_VACIA)
+	if(cola_vacia(&cola)  != COLA_VACIA)
 	{
 
-		sacar_de_pila(&pilaDatos, &tipoDato);
+		sacar_de_cola(&cola, &tipoDato);
 		printf("\t\tTIPO DATO: %s\n", tipoDato);
 
 
@@ -192,8 +195,8 @@ NODO:
 
 						validarDeclaracionTipoDato("REAL");
 				}
-
 			else{
+
 
 				validarDeclaracionTipoDato("INTEGER");
 			}
@@ -204,15 +207,15 @@ NODO:
 TIPO_DATO:
 
 	STRING {
-	poner_en_pila(&pilaDatos, "STRING");
+		poner_en_cola(&cola, "STRING");
 	}
 	|
 	INTEGER {
-	 poner_en_pila(&pilaDatos, "INTEGER");
+	 poner_en_cola(&cola, "INTEGER");
 
 	}
 	| REAL{
-		poner_en_pila(&pilaDatos, "REAL");
+		poner_en_cola(&cola, "REAL");
 
 	};
 
