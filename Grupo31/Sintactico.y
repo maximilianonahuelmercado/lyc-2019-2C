@@ -7,7 +7,7 @@
 	#include "files_h/constantes.h"
 	#include "files_h/ts.h"
 	#include "files_h/pila.h"
-	#include "files_h/cola.h"
+	//#include "files_h/cola.h"
 
 	// Declaraciones onbligatorias para quitar advertencias
 	int yylineno;
@@ -39,7 +39,7 @@
 		t_pila pilaDatosInversa;
 		char condicion[5]; // puede ser AND u OR
 
-		t_cola cola;
+		//t_cola cola;
 
 
 
@@ -125,7 +125,6 @@
 
 programa:
 	{	printf("\tInicia el COMPILADOR\n\n");
-		crear_cola(&cola);
 	}
 
 	est_declaracion bloque
@@ -137,15 +136,24 @@ programa:
 
 est_declaracion:
 	VAR {	printf("\t\tDECLARACIONES VAR\n");	}
-	declaracion
+	lista_declaracion
 	ENDVAR {	printf("\t\tFIN DECLARACIONES ENDVAR\n");	}	;
 
+lista_declaracion:
+									declaracion | lista_declaracion declaracion;
 declaracion:
-	CAR_CA NODO CAR_CC;
+	CAR_CA lista_tipos_variable CAR_CC OP_DOSP CAR_CA lista_variables CAR_CC;
 
-NODO:
-TIPO_DATO CAR_CC OP_DOSP CAR_CA ID
-{
+lista_tipos_variable:
+										TIPO_DATO
+										| lista_tipos_variable CAR_COMA TIPO_DATO
+										;
+lista_variables:
+								ID
+								| lista_variables CAR_COMA ID
+								;
+
+/*{
 	//printf("\nArray declaraciones: %s , TIPO DE DATO %s", arrayDeclaraciones[0], tipoDato);
 	insertarEnArrayDeclaracion(yylval.str_val);
 	if(cola_vacia(&cola) != COLA_VACIA)
@@ -171,15 +179,15 @@ TIPO_DATO CAR_CC OP_DOSP CAR_CA ID
 			}
 	}
 }
-};
-NODO:
+};*/
+/*NODO:
 	TIPO_DATO CAR_COMA NODO CAR_COMA ID
 	{
-	insertarEnArrayDeclaracion(yylval.str_val);
 	if(cola_vacia(&cola)  != COLA_VACIA)
+	insertarEnArrayDeclaracion(yylval.str_val);
 	{
 
-		sacar_de_cola(&cola, &tipoDato);
+		sacar_de_cola(&cola, tipoDato);
 		printf("\t\tTIPO DATO: %s\n", tipoDato);
 
 
@@ -203,21 +211,12 @@ NODO:
 	}
 }
 };
-
+*/
 TIPO_DATO:
-
-	STRING {
-		poner_en_cola(&cola, "STRING");
-	}
-	|
-	INTEGER {
-	 poner_en_cola(&cola, "INTEGER");
-
-	}
-	| REAL{
-		poner_en_cola(&cola, "REAL");
-
-	};
+	STRING
+	| INTEGER
+	| REAL
+  ;
 
 
 bloque:

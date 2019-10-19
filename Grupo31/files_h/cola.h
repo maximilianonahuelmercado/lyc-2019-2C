@@ -11,7 +11,7 @@
 
 typedef struct s_nodo_c
 {
-	void * dato;
+	char * dato;
 	struct s_nodo_c *sig;
 } t_nodo_c;
 
@@ -22,9 +22,9 @@ typedef struct
 }t_cola;
 
 void crear_cola(t_cola *);
-int poner_en_cola(t_cola *, const void *);
-int sacar_de_cola(t_cola *, void *);
-int frente_de_cola(const t_cola *, void *);
+int poner_en_cola(t_cola *, const char *datos);
+int sacar_de_cola(t_cola *, char *);
+int frente_de_cola(const t_cola *, char *);
 int cola_vacia(const t_cola *);
 int cola_llena(const t_cola *);
 void vaciar_cola(t_cola *);
