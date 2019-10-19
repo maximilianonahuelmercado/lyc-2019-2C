@@ -2,42 +2,41 @@
 
 void crear_cola(t_cola *pc)
 {
-	(*pc)->fte = (*pc)->fdo = NULL;
+	pc->pri = pc->ult = NULL;
 }
 
 int cola_llena(const t_cola *pc)
 {
-	t_nodo *aux = (t_nodo *)malloc(sizeof(t_nodo));
+	t_nodo_c *aux = (t_nodo_c *)malloc(sizeof(t_nodo_c));
 	free(aux);
 	return aux == NULL;
 }
 
-int cola_vacia(t_cola *pc)
+int cola_vacia(const t_cola *pc)
 {
 	return pc->pri == NULL;
 }
 
-int poner_en_cola(t_cola *pc, const char *dato)
+int poner_en_cola(t_cola *pc, const void *datos)
 {
-	t_nodo *pnue = (t_nodo *)malloc(sizeof(t_nodo));
-	if(!*pnue)
+	t_nodo_c *pnue = (t_nodo_c *)malloc(sizeof(t_nodo_c));
+	if(pnue==NULL)
 		return SIN_MEM;
-	pnue->dato = *dato;
-	pnue->psig = NULL;
-	if(pc->ult)
+	pnue->dato = *datos;
+	pnue->sig = NULL;
+	if(pc->pri==NULL)
 	{
-		pc->ult->psig = pnue;
-		pc->ult = pnue;
+		pc->pri = pnue;
 	}
 	else
 	{
-		pc->pri = pnue;
-		pc->ult = pnue;
+		pc->ult->sig = pnue;
 	}
+	pc->ult=pnue;
 	return TODO_OK;
 }
 
-int ver_primero_cola(t_cola *pc, char *dato)
+int ver_primero_cola(t_cola *pc, void *dato)
 {
 	if(pc->pri == NULL)
 		return COLA_VACIA;
@@ -45,20 +44,18 @@ int ver_primero_cola(t_cola *pc, char *dato)
 	return TODO_OK;
 }
 
-int sacar_de_cola(t_cola *pc, char *dato)
+int sacar_de_cola(t_cola *pc, void *dato)
 {
-	t_nodo *aux;
+	t_nodo_c *aux;
 	if(pc->pri == NULL)
 		return COLA_VACIA;
 	aux = pc->pri;
+	pc->pri = aux->sig;
 	*dato = aux->dato;
-	if(pc->pri == p->ult)
+	free(aux);
+	if(pc->pri == NULL)
 	{
-		pc->pri = NULL;
 		pc->ult = NULL;
 	}
-	else
-		pc->pri = aux->psig;
-	free(aux);
 	return TODO_OK;
 }

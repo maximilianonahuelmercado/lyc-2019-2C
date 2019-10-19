@@ -50,7 +50,7 @@
 		int longitud_arrayTipoDato = 0; // incremento en el arrayTipoDato
 		char * arrayComparacionTipos[100];	// array para comparar tipos
 		int longitud_arrayComparacionTipos = 0; // incremento en el array arrayComparacionTipos
-		char * tipoDato[100];
+		char * tipoDato;
 
 		// Auxiliar para manejar tercetos;
 		int indiceExpresion, indiceTermino, indiceFactor, indiceLongitud;
@@ -151,7 +151,7 @@ TIPO_DATO CAR_CC OP_DOSP CAR_CA ID
 	if(cola_vacia(&cola) != COLA_VACIA)
 	{
 
-		sacar_de_cola(&cola, &tipoDato);
+		sacar_de_cola(&cola, tipoDato);
 		printf("\t\tTIPO DATO: %s\n", tipoDato);
 	if(strcmp(tipoDato, "STRING") == 0)
 	{
