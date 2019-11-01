@@ -6,7 +6,7 @@
 --/Declaraciones/--
 
 VAR
-[string, int, float, string, int, int, int, float]:[k, a, b, c, i, j, w, p]
+[string, int, int, int, int, int, int, float]:[k, a, b, c, i, j, w, p]
 ENDVAR
 
 --/Repeat/--

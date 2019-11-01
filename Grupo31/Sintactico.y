@@ -49,7 +49,7 @@
 		char * arrayComparacionTipos[100];	// array para comparar tipos
 		int longitud_arrayComparacionTipos = 0; // incremento en el array arrayComparacionTipos
 		char * tipoDato[100];
-
+    char * ids[100];
 
 		// Auxiliar para manejar tercetos;
 		int indiceExpresion, indiceTermino, indiceFactor, indiceLongitud;
@@ -142,90 +142,47 @@ est_declaracion:
 	ENDVAR {	printf("\t\tFIN DECLARACIONES ENDVAR\n");	}	;
 
 declaracion:
-	CAR_CA NODO CAR_CC;
+	CAR_CA NODO
+	{
+			while((pila_vacia(&pilaDatos) != PILA_VACIA ) && (pila_vacia(&pilaTemporal) != PILA_VACIA))
+			{
+				sacar_de_pila(&pilaTemporal, &tipoDato);
+				//printf("LA PILA TIPOS TIENE: %s\n",tipoDato );
+			  sacar_de_pila(&pilaDatos, &ids);
+				//printf("LA PILA IDS TIENE: %s\n",ids);
+				insertarEnArrayDeclaracion(ids);
+				printf("TIPO: %s", tipoDato);
+				if(strcmp(tipoDato, "STRING") == 0)
+				{
+					printf("\tENTRE POR STRING");
+					validarDeclaracionTipoDato("STRING");
+				}
+				else{
+						if(strcmp(tipoDato, "REAL") == 0)
+							{
+									printf("\tENTRE POR REAL");
+									validarDeclaracionTipoDato("REAL");
+							}
+
+						else{
+							printf("\tENTRE POR INTEGER");
+							validarDeclaracionTipoDato("INTEGER");
+						}
+				}
+			}
+  }
+ CAR_CC;
 
 NODO:
-TIPO_DATO {
-	//sacar_de_pila(&pilaTemporal, &tipoDato);
-	//poner_en_pila(&pilaDatos, &tipoDato);
-	//tope_pila(&pilaDatos,&tipoDato);
-  printf("LA PILA TIENE: %s\n",tipoDato );
-}
-	CAR_CC OP_DOSP
-CAR_CA ID
+TIPO_DATO CAR_CC OP_DOSP CAR_CA ID
 {
-	//printf("\nArray declaraciones: %s , TIPO DE DATO %s", arrayDeclaraciones[0], tipoDato);
-
-	insertarEnArrayDeclaracion(yylval.str_val);
-	if(pila_vacia(&pilaTemporal)  != PILA_VACIA)
-	{
-
-		sacar_de_pila(&pilaTemporal, &tipoDato);
-		printf("\t\tTIPO DATO: %s\n", tipoDato);
-	/*if(strcmp(tipoDato, "STRING") == 0)
-	{
-
-		validarDeclaracionTipoDato("STRING");
-	}
-	else{
-			if(strcmp(tipoDato, "REAL") == 0)
-			 	{
-
-						validarDeclaracionTipoDato("REAL");
-				}
-
-			else{
-
-				validarDeclaracionTipoDato("INTEGER");
-			}
-	}
-}*/
-}
+	poner_en_pila(&pilaDatos, yylval.str_val);
 };
 NODO:
-	TIPO_DATO {
-		//sacar_de_pila(&pilaTemporal, &tipoDato);
-		//poner_en_pila(&pilaDatos, &tipoDato);
-		//tope_pila(&pilaDatos,&tipoDato);
-		printf("LA PILA TIENE: %s \n",tipoDato );
-	}
-		 CAR_COMA NODO
-
-
-
-
-	CAR_COMA ID
+	TIPO_DATO CAR_COMA NODO CAR_COMA ID
 	{
-
-	insertarEnArrayDeclaracion(yylval.str_val);
-	if(pila_vacia(&pilaTemporal)  != PILA_VACIA)
-	{
-
-		sacar_de_pila(&pilaTemporal, &tipoDato);
-		printf("\t\tTIPO DATO: %s\n", tipoDato);
-
-
-
-	/*if(strcmp(tipoDato, "STRING") == 0)
-	{
-
-		validarDeclaracionTipoDato("STRING");
-	}
-	else{
-			if(strcmp(tipoDato, "REAL") == 0)
-			 	{
-
-						validarDeclaracionTipoDato("REAL");
-				}
-
-			else{
-
-				validarDeclaracionTipoDato("INTEGER");
-			}
-	}
-}*/
-}
-};
+		poner_en_pila(&pilaDatos, yylval.str_val);
+	};
 
 TIPO_DATO:
 
@@ -265,14 +222,14 @@ sentencia:
 ciclo:
 	REPEAT
 	{	printf("\t\tREPEAT\n");
-		//indiceAux=crearTerceto(obtenerNuevoNombreEtiqueta("inicio_repeat"),"_","_");
-		//poner_en_pila(&pila,&indiceAux);
+		indiceAux=crearTerceto(obtenerNuevoNombreEtiqueta("inicio_repeat"),"_","_");
+		poner_en_pila(&pila,&indiceAux);
 	}
 	{printf("\t\tPASA REPEAT\n");}
 	CAR_PA condicion CAR_PC
 	{
 		printf("\t\tPASA CONDICION\n");
-		//indicePrincipioBloque = obtenerIndiceActual();
+		indicePrincipioBloque = obtenerIndiceActual();
 	}
 	bloque
 	{printf("\t\tPASA BLOQUE\n");}

@@ -1,11 +1,12 @@
 Nombre                        Tipo        Valor                         Longitud    
-k                             INTEGER     
-a                             INTEGER     
-b                             INTEGER     
-c                             INTEGER     
-i                             INTEGER     
-j                             INTEGER     
+p                             REAL        
 w                             INTEGER     
+j                             INTEGER     
+i                             INTEGER     
+c                             INTEGER     
+b                             INTEGER     
+a                             INTEGER     
+k                             STRING      
 &cte1                        CONST_INT   5                                         
 &cte2                        CONST_INT   15                                        
 &cte3                        CONST_INT   4                                         
