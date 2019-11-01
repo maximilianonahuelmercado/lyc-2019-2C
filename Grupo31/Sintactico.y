@@ -35,6 +35,7 @@
 		t_pila pila_condicion_doble;
 		t_pila pila_ciclo_especial;
 		t_pila pilaDatos;
+		t_pila pilaTemporal;
 		t_pila pilaDatosInversa;
 		char condicion[5]; // puede ser AND u OR
 
@@ -47,7 +48,8 @@
 		int longitud_arrayTipoDato = 0; // incremento en el arrayTipoDato
 		char * arrayComparacionTipos[100];	// array para comparar tipos
 		int longitud_arrayComparacionTipos = 0; // incremento en el array arrayComparacionTipos
-		char * tipoDato;
+		char * tipoDato[100];
+
 
 		// Auxiliar para manejar tercetos;
 		int indiceExpresion, indiceTermino, indiceFactor, indiceLongitud;
@@ -122,6 +124,9 @@
 
 programa:
 	{	printf("\tInicia el COMPILADOR\n\n");
+		crear_pila(&pilaDatos);
+		crear_pila(&pilaTemporal);
+
 	}
 
 	est_declaracion bloque
@@ -133,35 +138,109 @@ programa:
 
 est_declaracion:
 	VAR {	printf("\t\tDECLARACIONES VAR\n");	}
-		lista_declaracion
+	declaracion
 	ENDVAR {	printf("\t\tFIN DECLARACIONES ENDVAR\n");	}	;
 
-	lista_declaracion:
-				  declaracion
-				| lista_declaracion declaracion
-				;
-
 declaracion:
-			CAR_CA lista_tipos_variable CAR_CC OP_DOSP CAR_CA lista_variables CAR_CC
-			;
+	CAR_CA NODO CAR_CC;
 
-lista_tipos_variable:
-			      TIPO_DATO
-				| lista_tipos_variable CAR_COMA TIPO_DATO
-				;
+NODO:
+TIPO_DATO {
+	//sacar_de_pila(&pilaTemporal, &tipoDato);
+	//poner_en_pila(&pilaDatos, &tipoDato);
+	//tope_pila(&pilaDatos,&tipoDato);
+  printf("LA PILA TIENE: %s\n",tipoDato );
+}
+	CAR_CC OP_DOSP
+CAR_CA ID
+{
+	//printf("\nArray declaraciones: %s , TIPO DE DATO %s", arrayDeclaraciones[0], tipoDato);
+
+	insertarEnArrayDeclaracion(yylval.str_val);
+	if(pila_vacia(&pilaTemporal)  != PILA_VACIA)
+	{
+
+		sacar_de_pila(&pilaTemporal, &tipoDato);
+		printf("\t\tTIPO DATO: %s\n", tipoDato);
+	/*if(strcmp(tipoDato, "STRING") == 0)
+	{
+
+		validarDeclaracionTipoDato("STRING");
+	}
+	else{
+			if(strcmp(tipoDato, "REAL") == 0)
+			 	{
+
+						validarDeclaracionTipoDato("REAL");
+				}
+
+			else{
+
+				validarDeclaracionTipoDato("INTEGER");
+			}
+	}
+}*/
+}
+};
+NODO:
+	TIPO_DATO {
+		//sacar_de_pila(&pilaTemporal, &tipoDato);
+		//poner_en_pila(&pilaDatos, &tipoDato);
+		//tope_pila(&pilaDatos,&tipoDato);
+		printf("LA PILA TIENE: %s \n",tipoDato );
+	}
+		 CAR_COMA NODO
 
 
-lista_variables:
-				  ID
-				| lista_variables CAR_COMA ID
-				;
+
+
+	CAR_COMA ID
+	{
+
+	insertarEnArrayDeclaracion(yylval.str_val);
+	if(pila_vacia(&pilaTemporal)  != PILA_VACIA)
+	{
+
+		sacar_de_pila(&pilaTemporal, &tipoDato);
+		printf("\t\tTIPO DATO: %s\n", tipoDato);
+
+
+
+	/*if(strcmp(tipoDato, "STRING") == 0)
+	{
+
+		validarDeclaracionTipoDato("STRING");
+	}
+	else{
+			if(strcmp(tipoDato, "REAL") == 0)
+			 	{
+
+						validarDeclaracionTipoDato("REAL");
+				}
+
+			else{
+
+				validarDeclaracionTipoDato("INTEGER");
+			}
+	}
+}*/
+}
+};
 
 TIPO_DATO:
-	STRING
+
+	STRING {
+	poner_en_pila(&pilaTemporal, "STRING");
+	}
 	|
-	INTEGER
-	| REAL
-	;
+	INTEGER {
+	 poner_en_pila(&pilaTemporal, "INTEGER");
+
+	}
+	| REAL{
+		poner_en_pila(&pilaTemporal, "REAL");
+
+	};
 
 
 bloque:
