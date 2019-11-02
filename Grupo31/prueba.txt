@@ -7,7 +7,10 @@
 
 VAR
 [string, int, int, int, int, int, int, float]:[k, a, b, c, i, j, w, p]
+[int]:[x]
 ENDVAR
+
+
 
 --/Repeat/--
 REPEAT(a > b)

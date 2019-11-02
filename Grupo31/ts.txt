@@ -7,6 +7,7 @@ c                             INTEGER
 b                             INTEGER     
 a                             INTEGER     
 k                             STRING      
+x                             INTEGER     
 &cte1                        CONST_INT   5                                         
 &cte2                        CONST_INT   15                                        
 &cte3                        CONST_INT   4                                         
