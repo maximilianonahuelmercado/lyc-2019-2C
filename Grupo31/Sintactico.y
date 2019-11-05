@@ -16,7 +16,7 @@
 	int yyparse();
 
 	// Cabecera funciones varias
-		void insertarEnArrayDeclaracion(char **);
+		void insertarEnArrayDeclaracion(char *);
 		void validarDeclaracionTipoDato(char *);
 		char * negarComparador(char*);
 		char * obtenerNuevoNombreEtiqueta(char *);
@@ -51,7 +51,6 @@
 		void imprimirInstrucciones();
 		void generarFin();
 
-		int startEtiqueta = 0;
 
 
 
@@ -62,8 +61,8 @@
 		int longitud_arrayTipoDato = 0; // incremento en el arrayTipoDato
 		char * arrayComparacionTipos[100];	// array para comparar tipos
 		int longitud_arrayComparacionTipos = 0; // incremento en el array arrayComparacionTipos
-		char * tipoDato[100];
-    char * ids[100];
+		char tipoDato[100];
+    char ids[100];
 
 		// Auxiliar para manejar tercetos;
 		int indiceExpresion, indiceTermino, indiceFactor, indiceLongitud;
@@ -167,7 +166,7 @@ declaracion:
 			  sacar_de_pila(&pilaDatos, &ids);
 				insertarEnArrayDeclaracion(ids);
 				printf("TIPO: %s", tipoDato);
-				if(strcmp(&tipoDato, "STRING") == 0)
+				if(strcmp(tipoDato, "STRING") == 0)
 				{
 					printf("\tENTRE POR STRING");
 					validarDeclaracionTipoDato("STRING");
@@ -621,7 +620,7 @@ int yyerror(char *msg)
     exit(1);
 }
 
-void insertarEnArrayDeclaracion(char ** val)
+void insertarEnArrayDeclaracion(char * val)
 {
     char * aux = (char *) malloc(sizeof(char) * (strlen(val) + 1));
     strcpy(aux, val);
@@ -776,12 +775,17 @@ void generarASM(){
     crear_pila(&pVariables);
 
     generarEncabezado();
+		printf("SE GENERO ENCABEZADO\n");
     generarDatos();
+		printf("SE GENERO DATOS\n");
     generarCodigo();
+		printf("SE GENERO CODIGO\n");
     generarFin();
+		printf("SE GENERO FIN\n");
 
     // Cerrar archivo
     fclose(pfASM);
+		printf("SE CERRO EL ARCHIVO\n");
 }
 
 void generarEncabezado(){
@@ -808,6 +812,7 @@ void generarDatos(){
 	int tamTS = obtenerTamTS();
 	for(i=0; i<tamTS; i++)
 	{
+		printf("DATOS - ENTRO EN EL FOR DE TIPOS DE TS\n");
 		if(strcmp(tablaSimbolos[i].tipo, "INTEGER") == 0 )
 		{
 			fprintf(pfASM, "\t%s dd 0\n",tablaSimbolos[i].nombre);
@@ -856,6 +861,7 @@ void imprimirFuncString(){
 }
 
 void generarCodigo(){
+		printf("CODIGO - EMPEZO A GENERAR CODIGO ASM\n");
     fprintf(pfASM, "\n.CODE ;Comienzo de la zona de codigo\n");
 
 	//Imprimo funciones de manejo de strings
@@ -878,6 +884,7 @@ void generarCodigo(){
 	int flag;
 	for(i=0; i<tamTercetos; i++)
 	{
+		printf("CODIGO - ENTRO EN EL FOR DE TERCETOS\n");
 		// sprintf(auxEtiqueta,"ETIQUETA%d:",i);
 		char operador[50];
 		strcpy(operador,tercetos[i].operador);
@@ -1117,23 +1124,27 @@ void generarCodigo(){
 
 		if(flag == 0)
 		{
+			printf("CODIGO - ENTRO EN IF\n");
 			char * nombre = recuperarNombreTS(operador);
 			char auxNombre[50] = "";
 			strcpy(auxNombre, nombre);
-            poner_en_pila(&pVariables,&auxNombre);
+      poner_en_pila(&pVariables,&auxNombre);
 		}
-
+		printf("CODIGO - TERMINO FOR DE TERCETOS\n");
 	}
 
 	while(pila_vacia(&pVariables) != PILA_VACIA)
 	{
+		printf("CODIGO - ENTRO EN ULTIMO WHILE\n");
 		char varApilada[50] = "";
 		sacar_de_pila(&pVariables, &varApilada);
 		printf("\n Se saco de pila: %s ", varApilada);
 	}
+	printf("CODIGO - TERMINO LA FUNCION codigo\n");
 }
 
 void generarFin(){
+		printf("FIN - ENTRO EN GENERAR FIN\n");
     fprintf(pfASM, "\nTERMINAR: ;Fin de ejecución.\n");
     fprintf(pfASM, "\tmov ax, 4C00h ;termina la ejecución.\n");
     fprintf(pfASM, "\tint 21h ;syscall\n");
