@@ -341,7 +341,7 @@ entrada_salida:
 	PRINT CONST_STR
 	{
 		indiceAux = crearTerceto(yylval.str_val,"_","_");
-		crearTerceto("DISPLAY",armarIndiceI(indiceAux),"_");
+		crearTerceto("PRINT",armarIndiceI(indiceAux),"_");
 	};
 
 
@@ -1073,10 +1073,10 @@ void generarCodigo(){
 			poner_en_pila(&pVariables,&auxStr);
 		}
 
-		if(strcmp(operador, "GET") == 0)
+		if(strcmp(operador, "READ") == 0)
 		{
 			flag = 1;
-			fprintf(pfASM,"\t;GET\n");
+			fprintf(pfASM,"\t;READ\n");
 			sacar_de_pila(&pVariables,&aux1);
 
 			char * tipo = recuperarTipoTS(aux1);
@@ -1101,10 +1101,10 @@ void generarCodigo(){
 			}
 		}
 
-		if(strcmp(operador, "DISPLAY") == 0)
+		if(strcmp(operador, "PRINT") == 0)
 		{
 			flag = 1;
-			fprintf(pfASM,"\t;DISPLAY\n");
+			fprintf(pfASM,"\t;PRINT\n");
 			sacar_de_pila(&pVariables,&aux1);
 
 			char * tipo = recuperarTipoTS(aux1);
@@ -1125,9 +1125,12 @@ void generarCodigo(){
 		if(flag == 0)
 		{
 			printf("CODIGO - ENTRO EN IF\n");
+			printf("EL OPERADOR TIENE: %s\n",operador );
 			char * nombre = recuperarNombreTS(operador);
+			printf("NOMBRE TIENE: %s\n", nombre );
 			char auxNombre[50] = "";
 			strcpy(auxNombre, nombre);
+			printf("AUXNOMBRE TIENE: %s\n", auxNombre);
       poner_en_pila(&pVariables,&auxNombre);
 		}
 		printf("CODIGO - TERMINO FOR DE TERCETOS\n");

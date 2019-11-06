@@ -15,6 +15,7 @@ ENDVAR
 --/Repeat/--
 REPEAT(a > b)
 	c:=a+5
+	c:=a+22
 ENDREPEAT
 
 --/Condicion/--
@@ -51,12 +52,11 @@ ENDIF
 INLIST(z; [2.3 ; 1.22])
 
 --/READ AND PRINT/--
-READ n
 PRINT b
 PRINT "HOLA"
 print "hello"
 PRINT "HOLA fdf 6543 mm"
-read n
+read p
 print i
 print "mundo"
 print "world"
