@@ -49,65 +49,65 @@ INCLUDE number.asm		 ;incluye el asm para impresion de numeros
 	@aux13 dd 0.0
 	@aux14 dd 0.0
 	@aux15 dd 0.0
+	@aux16 dd 0.0
 	@aux17 dd 0.0
 	@aux18 dd 0.0
 	@aux19 dd 0.0
 	@aux20 dd 0.0
 	@aux21 dd 0.0
 	@aux22 dd 0.0
-	@aux23 dd 0.0
 	@aux24 dd 0.0
+	@aux25 dd 0.0
 	@aux26 dd 0.0
 	@aux27 dd 0.0
 	@aux28 dd 0.0
+	@aux29 dd 0.0
 	@aux30 dd 0.0
 	@aux31 dd 0.0
-	@aux32 dd 0.0
 	@aux33 dd 0.0
 	@aux34 dd 0.0
 	@aux35 dd 0.0
-	@aux36 dd 0.0
 	@aux37 dd 0.0
+	@aux38 dd 0.0
 	@aux39 dd 0.0
 	@aux40 dd 0.0
 	@aux41 dd 0.0
 	@aux42 dd 0.0
+	@aux43 dd 0.0
 	@aux44 dd 0.0
-	@aux45 dd 0.0
 	@aux46 dd 0.0
+	@aux47 dd 0.0
 	@aux48 dd 0.0
 	@aux49 dd 0.0
-	@aux50 dd 0.0
 	@aux51 dd 0.0
 	@aux52 dd 0.0
 	@aux53 dd 0.0
-	@aux54 dd 0.0
 	@aux55 dd 0.0
+	@aux56 dd 0.0
 	@aux57 dd 0.0
 	@aux58 dd 0.0
 	@aux59 dd 0.0
 	@aux60 dd 0.0
+	@aux61 dd 0.0
 	@aux62 dd 0.0
-	@aux63 dd 0.0
 	@aux64 dd 0.0
 	@aux65 dd 0.0
+	@aux66 dd 0.0
 	@aux67 dd 0.0
-	@aux68 dd 0.0
 	@aux69 dd 0.0
 	@aux70 dd 0.0
+	@aux71 dd 0.0
 	@aux72 dd 0.0
-	@aux73 dd 0.0
 	@aux74 dd 0.0
 	@aux75 dd 0.0
 	@aux76 dd 0.0
 	@aux77 dd 0.0
+	@aux79 dd 0.0
 	@aux80 dd 0.0
 	@aux81 dd 0.0
 	@aux82 dd 0.0
 	@aux83 dd 0.0
 	@aux84 dd 0.0
-	@aux85 dd 0.0
-	@aux86 dd 0.0
 	@aux87 dd 0.0
 	@aux88 dd 0.0
 	@aux89 dd 0.0
@@ -131,6 +131,17 @@ INCLUDE number.asm		 ;incluye el asm para impresion de numeros
 	@aux107 dd 0.0
 	@aux108 dd 0.0
 	@aux109 dd 0.0
+	@aux110 dd 0.0
+	@aux111 dd 0.0
+	@aux112 dd 0.0
+	@aux113 dd 0.0
+	@aux114 dd 0.0
+	@aux115 dd 0.0
+	@aux116 dd 0.0
+	@aux117 dd 0.0
+	@aux118 dd 0.0
+	@aux119 dd 0.0
+	@aux120 dd 0.0
 
 .CODE ;Comienzo de la zona de codigo
 START: 		;Código assembler resultante de compilar el programa fuente.
@@ -152,22 +163,44 @@ ETIQ_inicio_1:
 	fwait
 	sahf
 
-	ja ETIQ_fin_repeat_16
+	ja ETIQ_fin_repeat_23
 
 
 ETIQ_inicio_6:
-	;ASIGNACIÓN
+	;SUMA
+	fld a
 	fld &cte1
-	fstp c
+	fadd
+	fstp @aux9
 
 	;ASIGNACIÓN
+	fld @aux9
+	fstp c
+
+	;SUMA
+	fld b
+	fld &cte1
+	fadd
+	fstp @aux14
+
+	;ASIGNACIÓN
+	fld @aux14
+	fstp c
+
+	;SUMA
+	fld a
 	fld &cte2
+	fadd
+	fstp @aux19
+
+	;ASIGNACIÓN
+	fld @aux19
 	fstp c
 
 	jmp ETIQ_inicio_repeat_0
 
 
-ETIQ_fin_repeat_16:
+ETIQ_fin_repeat_23:
 	;CMP
 	fld i
 	fld &cte3
@@ -176,7 +209,7 @@ ETIQ_fin_repeat_16:
 	fwait
 	sahf
 
-	je ETIQ_fin_seleccion_29
+	je ETIQ_fin_seleccion_36
 	;CMP
 	fld a
 	fld &cte4
@@ -185,17 +218,17 @@ ETIQ_fin_repeat_16:
 	fwait
 	sahf
 
-	je ETIQ_fin_seleccion_29
+	je ETIQ_fin_seleccion_36
 
 
-ETIQ_inicio_25:
+ETIQ_inicio_32:
 	;ASIGNACIÓN
 	fld &cte5
 	fstp i
 
 
 
-ETIQ_fin_seleccion_29:
+ETIQ_fin_seleccion_36:
 	;CMP
 	fld i
 	fld &cte3
@@ -204,7 +237,7 @@ ETIQ_fin_seleccion_29:
 	fwait
 	sahf
 
-	je ETIQ_inicio_43
+	je ETIQ_inicio_50
 	;CMP
 	fld a
 	fld &cte4
@@ -213,25 +246,25 @@ ETIQ_fin_seleccion_29:
 	fwait
 	sahf
 
-	je ETIQ_inicio_43
+	je ETIQ_inicio_50
 
 
-ETIQ_inicio_38:
+ETIQ_inicio_45:
 	;ASIGNACIÓN
 	fld &cte5
 	fstp i
 
-	jmp ETIQ_fin_seleccion_47
+	jmp ETIQ_fin_seleccion_54
 
 
-ETIQ_inicio_43:
+ETIQ_inicio_50:
 	;ASIGNACIÓN
 	fld &cte6
 	fstp i
 
 
 
-ETIQ_fin_seleccion_47:
+ETIQ_fin_seleccion_54:
 	;CMP
 	fld i
 	fld &cte3
@@ -240,7 +273,7 @@ ETIQ_fin_seleccion_47:
 	fwait
 	sahf
 
-	je ETIQ_inicio_61
+	je ETIQ_inicio_68
 	;CMP
 	fld a
 	fld &cte4
@@ -249,10 +282,10 @@ ETIQ_fin_seleccion_47:
 	fwait
 	sahf
 
-	je ETIQ_inicio_61
+	je ETIQ_inicio_68
 
 
-ETIQ_inicio_56:
+ETIQ_inicio_63:
 	;ASIGNACIÓN
 	fld &cte5
 	fstp i
@@ -260,7 +293,7 @@ ETIQ_inicio_56:
 	jmp ETIQ_inicio_repeat_0
 
 
-ETIQ_inicio_61:
+ETIQ_inicio_68:
 	;CMP
 	fld j
 	fld &cte7
@@ -269,10 +302,10 @@ ETIQ_inicio_61:
 	fwait
 	sahf
 
-	jne ETIQ_inicio_71
+	jne ETIQ_inicio_78
 
 
-ETIQ_inicio_66:
+ETIQ_inicio_73:
 	;CMP
 	fld w
 	fld &cte8
@@ -281,10 +314,10 @@ ETIQ_inicio_66:
 	fwait
 	sahf
 
-	je ETIQ_fin_seleccion_79
+	je ETIQ_fin_seleccion_86
 
 
-ETIQ_inicio_71:
+ETIQ_inicio_78:
 	;ASIGNACIÓN
 	fld &cte6
 	fstp i
@@ -295,12 +328,36 @@ ETIQ_inicio_71:
 
 
 
-ETIQ_fin_seleccion_78:
+ETIQ_fin_seleccion_85:
 
 
-ETIQ_fin_seleccion_79:
-	;CMP
+ETIQ_fin_seleccion_86:
+	;SUMA
+	fld a
+	fld b
+	fadd
+	fstp @aux89
+
+	;SUMA
+	fld b
 	fld c
+	fadd
+	fstp @aux92
+
+	;SUMA
+	fld a
+	fld b
+	fadd
+	fstp @aux95
+
+	;SUMA
+	fld b
+	fld c
+	fadd
+	fstp @aux98
+
+	;CMP
+	fld @aux98
 	fld &cte10
 	fcomp
 	fstsw ax
@@ -309,7 +366,7 @@ ETIQ_fin_seleccion_79:
 
 	jne ETIQ_inicio_repeat_0
 	;CMP
-	fld b
+	fld @aux95
 	fld &cte11
 	fcomp
 	fstsw ax

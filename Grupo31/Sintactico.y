@@ -523,20 +523,20 @@ comparador:
 
 			expresion:
 				{printf("\t\tENTRO A EXPRESOPM");}
-				termino	//{	indiceExpresion = indiceTermino;	}
+				termino	{	indiceExpresion = indiceTermino;	}
 				{printf("\t\tPASO TERMINO");}
 				| expresion OP_SUM termino
 				{
-					//indiceExpresion = crearTerceto("+",armarIndiceI(indiceExpresion),armarIndiceD(indiceTermino));
+					indiceExpresion = crearTerceto("+",armarIndiceI(indiceExpresion),armarIndiceD(indiceTermino));
 				}
 				| expresion OP_RES termino
 				{
-					//indiceExpresion = crearTerceto("-",armarIndiceI(indiceExpresion),armarIndiceD(indiceTermino));
+					indiceExpresion = crearTerceto("-",armarIndiceI(indiceExpresion),armarIndiceD(indiceTermino));
 				};
 
 			termino:
 			  {printf("\t\tENTRO TERMINO");}
-				factor	//{	indiceTermino = indiceFactor;	}
+				factor {	indiceTermino = indiceFactor;	}
 				{printf("\t\tPASO FACTOR");}
 				| termino OP_MUL factor
 				{
@@ -571,6 +571,7 @@ comparador:
 						startEtiqueta = 1;
 					}
 					insertarEnArrayComparacionTipos(yylval.str_val);
+					printf("\n\n\n\n\n\n\nCONST_INT:%s\n\n\n\n\n\n", yylval.str_val);
 					indiceFactor = crearTerceto(yylval.str_val,"_","_");
 				}
 				| CONST_REAL

@@ -15,6 +15,7 @@ ENDVAR
 --/Repeat/--
 REPEAT(a > b)
 	c:=a+5
+	c:=b+5
 	c:=a+22
 ENDREPEAT
 
