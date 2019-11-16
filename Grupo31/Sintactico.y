@@ -134,19 +134,19 @@
 %%
 
 programa:
-	{	printf("\tInicia el COMPILADOR\n\n");
+	{
 		crear_pila(&pilaDatos);
 		crear_pila(&pilaTemporal);
-
-
+		printf("\t\tINICIA EL COMPILADOR\n");
 	}
 
 	est_declaracion bloque
-	{	printf("\n\tFin COMPILADOR OK\n");
+	{
 		prepararTSParaAssembler();
 		crearArchivoTS();
 		crearArchivoTercetosIntermedia();
 		generarASM();
+		printf("\t\tFINALIZA EL COMPILADOR\n");
 	}	;
 
 est_declaracion:
@@ -165,23 +165,19 @@ declaracion:
 				sacar_de_pila(&pilaTemporal, &tipoDato);
 			  sacar_de_pila(&pilaDatos, &ids);
 				insertarEnArrayDeclaracion(ids);
-				printf("TIPO: %s", tipoDato);
 				if(strcmp(tipoDato, "STRING") == 0)
 				{
-					printf("\tENTRE POR STRING");
 					validarDeclaracionTipoDato("STRING");
 				}
 				else{
 						if(strcmp(tipoDato, "REAL") == 0)
 							{
-									printf("\tENTRE POR REAL");
 									validarDeclaracionTipoDato("REAL");
 							}
 
 						else{
-							printf("\tENTRE POR INTEGER");
 							validarDeclaracionTipoDato("INTEGER");
-						}
+								}
 				}
 			}
   }
@@ -239,14 +235,11 @@ ciclo:
 		indiceAux=crearTerceto(obtenerNuevoNombreEtiqueta("inicio_repeat"),"_","_");
 		poner_en_pila(&pila,&indiceAux);
 	}
-	{printf("\t\tPASA REPEAT\n");}
 	CAR_PA condicion CAR_PC
 	{
-		printf("\t\tPASA CONDICION\n");
 		indicePrincipioBloque = obtenerIndiceActual();
 	}
 	bloque
-	{printf("\t\tPASA BLOQUE\n");}
 	ENDREPEAT
 	{	printf("\t\tENDREPEAT\n");
 	int indiceDesapilado;
@@ -469,10 +462,8 @@ condicion:
 			}	;
 
 comparacion:
-				{printf("\t\tENTRO COMPARAXION\n");}
 	   		expresion comparador expresion
 				{
-				{printf("\t\tENTRO COMPARADOR\n");}
 				compararTipos();
 				indiceDer = indiceExpresion;
 				crearTerceto("CMP",armarIndiceI(indiceIzq),armarIndiceD(indiceDer));
@@ -485,46 +476,37 @@ comparacion:
 comparador:
 			CMP_MAYOR
 				{
-					printf("\t\tENTRO A COMPARADOR");
-					//char comparadorApilado[8] = "BLE";
 					char comparadorApilado[8] = "JA";
 					poner_en_pila(&pila,&comparadorApilado);
 				}
 				| CMP_MENOR
 				{
-					// char comparadorApilado[8] = "BGE";
 					char comparadorApilado[8] = "JB";
 					poner_en_pila(&pila,&comparadorApilado);
 				}
 				| CMP_MAYORIGUAL
 				{
-					// char comparadorApilado[8] = "BLT";
 					char comparadorApilado[8] = "JAE";
 					poner_en_pila(&pila,&comparadorApilado);
 				}
 				| CMP_MENORIGUAL
 				{
-					// char comparadorApilado[8] = "BGT";
 					char comparadorApilado[8] = "JBE";
 					poner_en_pila(&pila,&comparadorApilado);
 				}
 				| CMP_IGUAL
 				{
-					// char comparadorApilado[8] = "BNE";
 					char comparadorApilado[8] = "JE";
 					poner_en_pila(&pila,&comparadorApilado);
 				}
 				| CMP_DISTINTO
 				{
-					// char comparadorApilado[8] = "BEQ";
 					char comparadorApilado[8] = "JNE";
 					poner_en_pila(&pila,&comparadorApilado);
 				} ;
 
 			expresion:
-				{printf("\t\tENTRO A EXPRESOPM");}
 				termino	{	indiceExpresion = indiceTermino;	}
-				{printf("\t\tPASO TERMINO");}
 				| expresion OP_SUM termino
 				{
 					indiceExpresion = crearTerceto("+",armarIndiceI(indiceExpresion),armarIndiceD(indiceTermino));
@@ -535,9 +517,7 @@ comparador:
 				};
 
 			termino:
-			  {printf("\t\tENTRO TERMINO");}
 				factor {	indiceTermino = indiceFactor;	}
-				{printf("\t\tPASO FACTOR");}
 				| termino OP_MUL factor
 				{
 					indiceTermino = crearTerceto("*",armarIndiceI(indiceTermino),armarIndiceD(indiceFactor));
@@ -548,20 +528,15 @@ comparador:
 				}	;
 
 			factor:
-				{printf("\t\tENTRO FACTOR\n");}
 				ID
-				{ printf("\t\tENTRO ID\n");
+				{
 					if(startEtiqueta == 0)
 					{
 						crearTerceto(obtenerNuevoNombreEtiqueta("inicio"),"_","_");
 						startEtiqueta = 1;
-						printf("\t\t\tID crear terceto paso\n");
 					}
-					printf("\t\tPto COntrol\n");
 					insertarEnArrayComparacionTipos(yylval.str_val);
 					indiceFactor = crearTerceto(yylval.str_val,"_","_");
-					printf("\t\tSALIO ID\n");
-
 				}
 				| CONST_INT
 				{
@@ -571,7 +546,6 @@ comparador:
 						startEtiqueta = 1;
 					}
 					insertarEnArrayComparacionTipos(yylval.str_val);
-					printf("\n\n\n\n\n\n\nCONST_INT:%s\n\n\n\n\n\n", yylval.str_val);
 					indiceFactor = crearTerceto(yylval.str_val,"_","_");
 				}
 				| CONST_REAL
@@ -626,14 +600,12 @@ void insertarEnArrayDeclaracion(char * val)
     char * aux = (char *) malloc(sizeof(char) * (strlen(val) + 1));
     strcpy(aux, val);
     arrayDeclaraciones[longitud_arrayDeclaraciones] = aux;
-		printf("\t\t\tArrayDeclaraciones: %s\n", arrayDeclaraciones[longitud_arrayDeclaraciones]);
     longitud_arrayDeclaraciones++;
 }
 
 
 void validarDeclaracionTipoDato(char * tipo)
 {
-	printf("ENTRE A validarDeclaracionTipoDato\n");
 	int i;
 	for (i=0; i < longitud_arrayDeclaraciones; i++)
 	{
@@ -679,26 +651,17 @@ char * obtenerNuevoNombreEtiqueta(char * val)
 
 void insertarEnArrayComparacionTipos(char * val)
 {
-	printf("VAL:  %s\n",val);
-	// Primero corroboramos existencia del token en la tabla de simbolos
-
 	if(existeTokenEnTS(yylval.str_val) == NO_EXISTE)
 	{
-		printf("\t\tENTRO EN IF");
 		char msg[300];
 		sprintf(msg, "ERROR en etapa GCI - Variable \'%s\' no declarada en la seccion declaracion", yylval.str_val);
 		yyerror(msg);
 	}
-  printf("\t\tSALIO DEL IF");
 	// Luego insertamos el tipo de token en nuestro array
 	char * tipo = recuperarTipoTS(val);
-	printf("DEVOLUCION DE LA FUNCION recuperarTipoTS:  %s\n",tipo);
 	tipo = tipoConstanteConvertido(tipo);
-	printf("\t\tSALIO DE CONSTANTE");
-	printf("DEVOLUCION DE LA FUNCION tipoConstanteConvertido: %s\n",tipo);
 	char * aux = (char *) malloc(sizeof(strlen(tipo) + 1));
 	strcpy(aux, tipo);
-	printf("DEVOLUCION DE ASIGNACION DE AUX : %s\n",aux);
   arrayComparacionTipos[longitud_arrayComparacionTipos] = aux;
   longitud_arrayComparacionTipos++;
 }
@@ -776,17 +739,10 @@ void generarASM(){
     crear_pila(&pVariables);
 
     generarEncabezado();
-		printf("SE GENERO ENCABEZADO\n");
     generarDatos();
-		printf("SE GENERO DATOS\n");
     generarCodigo();
-		printf("SE GENERO CODIGO\n");
     generarFin();
-		printf("SE GENERO FIN\n");
-
-    // Cerrar archivo
     fclose(pfASM);
-		printf("SE CERRO EL ARCHIVO\n");
 }
 
 void generarEncabezado(){
@@ -813,7 +769,6 @@ void generarDatos(){
 	int tamTS = obtenerTamTS();
 	for(i=0; i<tamTS; i++)
 	{
-		printf("DATOS - ENTRO EN EL FOR DE TIPOS DE TS\n");
 		if(strcmp(tablaSimbolos[i].tipo, "INTEGER") == 0 )
 		{
 			fprintf(pfASM, "\t%s dd 0\n",tablaSimbolos[i].nombre);
@@ -862,7 +817,6 @@ void imprimirFuncString(){
 }
 
 void generarCodigo(){
-		printf("CODIGO - EMPEZO A GENERAR CODIGO ASM\n");
     fprintf(pfASM, "\n.CODE ;Comienzo de la zona de codigo\n");
 
 	//Imprimo funciones de manejo de strings
@@ -885,8 +839,6 @@ void generarCodigo(){
 	int flag;
 	for(i=0; i<tamTercetos; i++)
 	{
-		printf("CODIGO - ENTRO EN EL FOR DE TERCETOS\n");
-		// sprintf(auxEtiqueta,"ETIQUETA%d:",i);
 		char operador[50];
 		strcpy(operador,tercetos[i].operador);
 		flag = 0;
@@ -1125,30 +1077,21 @@ void generarCodigo(){
 
 		if(flag == 0)
 		{
-			printf("CODIGO - ENTRO EN IF\n");
-			printf("EL OPERADOR TIENE: %s\n",operador );
 			char * nombre = recuperarNombreTS(operador);
-			printf("NOMBRE TIENE: %s\n", nombre );
 			char auxNombre[50] = "";
 			strcpy(auxNombre, nombre);
-			printf("AUXNOMBRE TIENE: %s\n", auxNombre);
       poner_en_pila(&pVariables,&auxNombre);
 		}
-		printf("CODIGO - TERMINO FOR DE TERCETOS\n");
 	}
 
 	while(pila_vacia(&pVariables) != PILA_VACIA)
 	{
-		printf("CODIGO - ENTRO EN ULTIMO WHILE\n");
 		char varApilada[50] = "";
 		sacar_de_pila(&pVariables, &varApilada);
-		printf("\n Se saco de pila: %s ", varApilada);
 	}
-	printf("CODIGO - TERMINO LA FUNCION codigo\n");
 }
 
 void generarFin(){
-		printf("FIN - ENTRO EN GENERAR FIN\n");
     fprintf(pfASM, "\nTERMINAR: ;Fin de ejecución.\n");
     fprintf(pfASM, "\tmov ax, 4C00h ;termina la ejecución.\n");
     fprintf(pfASM, "\tint 21h ;syscall\n");
