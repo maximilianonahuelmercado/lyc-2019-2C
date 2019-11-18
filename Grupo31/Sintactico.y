@@ -227,7 +227,7 @@ sentencia:
 	| entrada_salida
 	| modulo
 	| division
-	| inlist;
+	| en_lista;
 
 ciclo:
 	REPEAT
@@ -273,16 +273,22 @@ ciclo:
 	}	;
 
 modulo:
-	expresion MOD expresion
-	{ printf("\t\tMOD\n");};
+	expresion {indiceIzq = indiceExpresion + 1; } MOD expresion
+	{ printf("\t\tMOD\n");
+	 indiceDer = indiceExpresion + 1;
+	 crearTerceto("MOD",armarIndiceI(indiceIzq),armarIndiceD(indiceDer));
+	};
 
 division:
-	expresion DIV expresion
-	{ printf("\t\tDIV\n");};
+	expresion {indiceIzq = indiceExpresion + 1; } DIV expresion
+	{ printf("\t\tDIV\n");
+		indiceDer = indiceExpresion + 1;
+		crearTerceto("DIV",armarIndiceI(indiceIzq),armarIndiceD(indiceDer));
+	};
 
-inlist:
+en_lista:
 	{printf("\t\tINLIST\n");}
-	INLIST CAR_PA ID CAR_PYC CAR_CA lista_expresiones CAR_CC CAR_PC;
+	INLIST CAR_PA ID { indiceId = crearTerceto(yylval.str_val, "_", "_")} CAR_PYC CAR_CA lista_expresiones CAR_CC CAR_PC;
 
 lista_expresiones:
 			expresion
@@ -462,7 +468,7 @@ condicion:
 			}	;
 
 comparacion:
-	   		expresion comparador expresion
+	   		expresion { indiceIzq = indiceExpresion; } comparador expresion
 				{
 				compararTipos();
 				indiceDer = indiceExpresion;
@@ -1018,6 +1024,45 @@ void generarCodigo(){
 			fprintf(pfASM, "\tfld %s\n",aux1);
             fprintf(pfASM, "\tfld %s\n",aux2);
             fprintf(pfASM, "\tfdiv\n");
+
+			char auxStr[50] = "";
+			sprintf(auxStr, "@aux%d",i);
+			fprintf(pfASM, "\tfstp %s\n\n",auxStr);
+			insertarTokenEnTS("",auxStr);
+			poner_en_pila(&pVariables,&auxStr);
+		}
+
+		if(strcmp(operador, "MOD") == 0)
+		{
+			flag = 1;
+			fprintf(pfASM,"\t;MOD\n");
+			sacar_de_pila(&pVariables,&aux2);
+			sacar_de_pila(&pVariables,&aux1);
+
+			// fprintf(pfASM,"\t%s\n",auxEtiqueta);
+			fprintf(pfASM, "\tfld %s\n",aux1);
+						fprintf(pfASM, "\tfld %s\n",aux2);
+						fprintf(pfASM, "\tfdiv\n");
+
+			char auxStr[50] = "";
+			sprintf(auxStr, "@aux%d",i);
+			fprintf(pfASM, "\tfstp %s\n\n",auxStr);
+			insertarTokenEnTS("",auxStr);
+			poner_en_pila(&pVariables,&auxStr);
+		}
+
+
+		if(strcmp(operador, "DIV") == 0)
+		{
+			flag = 1;
+			fprintf(pfASM,"\t;DIV\n");
+			sacar_de_pila(&pVariables,&aux2);
+			sacar_de_pila(&pVariables,&aux1);
+
+			// fprintf(pfASM,"\t%s\n",auxEtiqueta);
+			fprintf(pfASM, "\tfild %s\n",aux1);
+						fprintf(pfASM, "\tfild %s\n",aux2);
+						fprintf(pfASM, "\tfdiv\n");
 
 			char auxStr[50] = "";
 			sprintf(auxStr, "@aux%d",i);
