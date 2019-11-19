@@ -165,9 +165,9 @@ INCLUDE number.asm		 ;incluye el asm para impresion de numeros
 	@aux145 dd 0.0
 	@aux146 dd 0.0
 
-.CODE ;Comienzo de la zona de codigo
-START: 		;Código assembler resultante de compilar el programa fuente.
-	mov AX,@DATA 		;Inicializa el segmento de datos
+.CODE ;Comienza sector de codigo
+START: 		;Codigo assembler resultante.
+	mov AX,@DATA 		;Comienza sector de datos
 	mov DS,AX
 	finit
 
@@ -325,4 +325,11 @@ ETIQ_inicio_69:
 	fld a
 	fld &cte7
 	fcomp
-	fs
+	fstsw ax
+	fwait
+	sahf
+
+	je ETIQ_inicio_83
+
+
+E

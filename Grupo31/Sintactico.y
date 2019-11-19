@@ -8,86 +8,78 @@
 	#include "files_h/ts.h"
 	#include "files_h/pila.h"
 
-	// Declaraciones onbligatorias para quitar advertencias
+	// Para sacar advertencias
 	int yylineno;
 	FILE  *yyin;
 	int yylex();
 	int yyerror(char *msg);
 	int yyparse();
 
-	// Cabecera funciones varias
-		void insertarEnArrayDeclaracion(char *);
-		void validarDeclaracionTipoDato(char *);
-		char * negarComparador(char*);
-		char * obtenerNuevoNombreEtiqueta(char *);
-		void insertarEnArrayComparacionTipos(char *);
-		void insertarEnArrayComparacionTiposDirecto(char *);
-		void imprimirArrayComparacionTipos();
-		void compararTipos();
-		char * tipoConstanteConvertido(char*);
-		void insertarEnArrayTercetos(char *operador, char *operando1, char *operando2);
-		void crearTercetosDelArray();
-		void guardarTipoDato(char *);
+	void insertarEnArrayDeclaracion(char *);
+	void validarDeclaracionTipoDato(char *);
+	char * negarComparador(char*);
+	char * obtenerNuevoNombreEtiqueta(char *);
+	void insertarEnArrayComparacionTipos(char *);
+	void insertarEnArrayComparacionTiposDirecto(char *);
+	void imprimirArrayComparacionTipos();
+	void compararTipos();
+	char * tipoConstanteConvertido(char*);
+	void insertarEnArrayTercetos(char *operador, char *operando1, char *operando2);
+	void crearTercetosDelArray();
+	void guardarTipoDato(char *);
 
+	// Pilas para resolver GCI
+	t_pila pila;
+	t_pila pila_condicion_doble;
+	t_pila pila_inlist;
+	t_pila pilaDatos;
+	t_pila pilaTemporal;
+	t_pila pilaDatosInversa;
+	char condicion[5];
 
-		// Declaro la pila (estructura externa que me servira para resolver GCI)
-		t_pila pila;
-		t_pila pila_condicion_doble;
-		t_pila pila_inlist;
-		t_pila pilaDatos;
-		t_pila pilaTemporal;
-		t_pila pilaDatosInversa;
-		char condicion[5];
+	// Para assembler
+	FILE * pfASM; // Final.asm
+	t_pila pila;  // Pila saltos
+	t_pila pVariables;  // Pila variables
 
-		// Para assembler
-		FILE * pfASM; // Final.asm
-		t_pila pila;  // Pila saltos
-		t_pila pVariables;  // Pila variables
+	void generarAssembler();
+	void generarEncabezado();
+	void generarDatos();
+	void generarCodigo();
+	void imprimirInstrucciones();
+	void generarFin();
 
-		void generarASM();
-		void generarEncabezado();
-		void generarDatos();
-		void generarCodigo();
-		void imprimirInstrucciones();
-		void generarFin();
+	// arrays
+	char * arrayDeclaraciones[100];
+	char * arrayTipoDato[100];
+	int longitud_arrayDeclaraciones = 0;
+	int longitud_arrayTipoDato = 0; // incrementos
+	char * arrayComparacionTipos[100];	// array para comparar tipos
+	int longitud_arrayComparacionTipos = 0; // incremento en el array arrayComparacionTipos
+	char tipoDato[100];
+	char ids[100];
 
+	// Auxiliar para manejar tercetos;
+	int indiceExpresion, indiceTermino, indiceFactor, indiceLongitud;
+	int indiceAux, indiceUltimo, indiceIzq, indiceDer, indiceComparador, indiceComparador1, indiceComparador2,
+	indiceId;
+	int indicePrincipioBloque;
+	char idAsignarStr[50];
 
-
-
-		// Arrays
-		char * arrayDeclaraciones[100];	// array para declaraciones
-		char * arrayTipoDato[100]; // array para tipos de dato
-		int longitud_arrayDeclaraciones = 0; // incremento en el array arrayDeclaraciones
-		int longitud_arrayTipoDato = 0; // incremento en el arrayTipoDato
-		char * arrayComparacionTipos[100];	// array para comparar tipos
-		int longitud_arrayComparacionTipos = 0; // incremento en el array arrayComparacionTipos
-		char tipoDato[100];
-    char ids[100];
-
-		// Auxiliar para manejar tercetos;
-		int indiceExpresion, indiceTermino, indiceFactor, indiceLongitud;
-		int indiceAux, indiceUltimo, indiceIzq, indiceDer, indiceComparador, indiceComparador1, indiceComparador2,
-		indiceId;
-		int indicePrincipioBloque;
-		char idAsignarStr[50];
-
-
-		int startEtiqueta = 0;
+	int startEtiqueta = 0;
 %}
 
 
 
 %union {
-	char * int_val;
-	char * real_val;
-	char * str_val;
-	char * cmp_val;
-}
+			char * int_val;
+			char * real_val;
+			char * str_val;
+			char * cmp_val;
+		}
 
-// Start symbol
 %start programa
 
-// Tokens
 %token VAR
 %token ENDVAR
 %token REAL
@@ -129,8 +121,7 @@
 %token CONST_STR
 %token ID
 
-
-//Reglas gramaticales
+// BNF
 %%
 
 programa:
@@ -145,7 +136,7 @@ programa:
 		prepararTSParaAssembler();
 		crearArchivoTS();
 		crearArchivoTercetosIntermedia();
-		generarASM();
+		generarAssembler();
 		printf("\t\tFINALIZA EL COMPILADOR\n");
 	}	;
 
@@ -181,7 +172,7 @@ declaracion:
 				}
 			}
   }
- CAR_CC;
+  CAR_CC;
 
 NODO:
 TIPO_DATO CAR_CC OP_DOSP CAR_CA ID
@@ -323,34 +314,31 @@ en_lista:
 	modificarTerceto(indiceDesapilado, 2, armarIndiceI(indiceActual+1));
 	sacar_de_pila(&pila, &indiceDesapilado); 
 	crearTerceto("JMP",armarIndiceI(indiceDesapilado),"_");
-	}
-	;
+	};
 
 lista_expresiones:
-			expresion
-			{
-				crearTerceto("CMP",armarIndiceI(indiceId),armarIndiceD(indiceExpresion));
-				indiceComparador = crearTerceto("JNE","_","_");
-				poner_en_pila(&pila_inlist,&indiceComparador);
-			}
+	expresion
+	{
+		crearTerceto("CMP",armarIndiceI(indiceId),armarIndiceD(indiceExpresion));
+		indiceComparador = crearTerceto("JNE","_","_");
+		poner_en_pila(&pila_inlist,&indiceComparador);
+	}
 
-			| lista_expresiones CAR_PYC expresion
-			{
-				crearTerceto("CMP",armarIndiceI(indiceId),armarIndiceD(indiceExpresion));
-				indiceComparador = crearTerceto("JNE","_","_");
-				poner_en_pila(&pila_inlist,&indiceComparador);
-			};
+	| lista_expresiones CAR_PYC expresion
+	{
+		crearTerceto("CMP",armarIndiceI(indiceId),armarIndiceD(indiceExpresion));
+		indiceComparador = crearTerceto("JNE","_","_");
+		poner_en_pila(&pila_inlist,&indiceComparador);
+	};
 
 asignacion:
-				lista_id expresion
-			{
-					printf("\t\tASIGNACION\n");
-					compararTipos();
-
-					indiceAux = crearTerceto(idAsignarStr,"_","_");
-
-					crearTerceto("=",armarIndiceI(indiceAux),armarIndiceD(indiceExpresion));
-		 };
+	lista_id expresion
+	{
+		printf("\t\tASIGNACION\n");
+		compararTipos();
+		indiceAux = crearTerceto(idAsignarStr,"_","_");
+		crearTerceto("=",armarIndiceI(indiceAux),armarIndiceD(indiceExpresion));
+	};
 
 lista_id:
 	ID OP_ASIG
@@ -360,17 +348,17 @@ lista_id:
 	};
 
 entrada_salida:
-	READ	ID
+	READ ID
 	{
 		printf("\t\tREAD\n");
 		indiceAux = crearTerceto(yylval.str_val,"_","_");
 		crearTerceto("READ",armarIndiceI(indiceAux),"_");
 	}
 	| PRINT ID
-	 {
-			indiceAux = crearTerceto(yylval.str_val,"_","_");
-			crearTerceto("PRINT",armarIndiceI(indiceAux),"_");
-		}
+	{
+		indiceAux = crearTerceto(yylval.str_val,"_","_");
+		crearTerceto("PRINT",armarIndiceI(indiceAux),"_");
+	}
 	|
 	PRINT CONST_STR
 	{
@@ -383,7 +371,9 @@ entrada_salida:
 seleccion:
 	IF CAR_PA condicion CAR_PC THEN
 	bloque
-	{printf("\t\tIF\n");}
+	{
+	printf("\t\tIF\n");
+	}
 	ENDIF
 	{
 		printf("\t\tENDIF\n");
@@ -449,20 +439,19 @@ seleccion:
 	}
 	bloque
 	ENDIF
-	 {
+	{
 		printf("\t\tENDIF (con else)\n");
 		int indiceDesapilado;
 		int indiceActual = obtenerIndiceActual();
 		sacar_de_pila(&pila, &indiceDesapilado);
 		modificarTerceto(indiceDesapilado, 2, armarIndiceI(indiceActual));
-	}	;
+	};
 
 
 condicion:
 			comparacion
 			{
 				printf("\t\tCOMPARACION\n");
-
 				startEtiqueta = 0;
 			}
 			| OP_NOT comparacion
@@ -470,7 +459,6 @@ condicion:
 				char *operador = obtenerTerceto(indiceComparador,1);
 				char *operadorNegado = negarComparador(operador);
 				modificarTerceto(indiceComparador,1,operadorNegado);
-
 				startEtiqueta = 0;
 			}
 			| comparacion { indiceComparador1 = indiceComparador; } OP_AND comparacion
@@ -480,7 +468,6 @@ condicion:
 				strcpy(condicion, "AND");
 				poner_en_pila(&pila_condicion_doble,&indiceComparador1);
 				poner_en_pila(&pila_condicion_doble,&indiceComparador2);
-
 				startEtiqueta = 0;
 			}
 			| comparacion
@@ -490,17 +477,16 @@ condicion:
 						char *operadorNegado = negarComparador(operador);
 						modificarTerceto(indiceComparador1,1,operadorNegado);
 						startEtiqueta = 0;
-				}
+					}
 		OP_OR comparacion
-		{
+			{
 				printf("\t\tCONDICION DOBLE OR\n");
 				indiceComparador2 = indiceComparador;
 				strcpy(condicion, "OR");
 				poner_en_pila(&pila_condicion_doble,&indiceComparador1);
 				poner_en_pila(&pila_condicion_doble,&indiceComparador2);
-
 				startEtiqueta = 0;
-			}	;
+			};
 
 comparacion:
 	   		expresion { indiceIzq = indiceExpresion; } comparador expresion
@@ -512,7 +498,7 @@ comparacion:
 				sacar_de_pila(&pila, &comparadorDesapilado);
 				indiceComparador = crearTerceto(comparadorDesapilado,"_","_");
 				poner_en_pila(&pila,&indiceComparador);
-			};
+				};
 
 comparador:
 			CMP_MAYOR
@@ -544,7 +530,7 @@ comparador:
 				{
 					char comparadorApilado[8] = "JNE";
 					poner_en_pila(&pila,&comparadorApilado);
-				} ;
+				};
 
 			expresion:
 				termino	{	indiceExpresion = indiceTermino;	}
@@ -566,7 +552,7 @@ comparador:
 				| termino OP_DIV factor
 				{
 					indiceTermino = crearTerceto("/",armarIndiceI(indiceTermino),armarIndiceD(indiceFactor));
-				}	;
+				};
 
 			factor:
 				ID
@@ -614,7 +600,7 @@ comparador:
 %%
 
 
-// Sección código
+// Funciones explotadas
 int main(int argc, char *argv[])
 {
     if ((yyin = fopen(argv[1], "rt")) == NULL)
@@ -661,7 +647,6 @@ void validarDeclaracionTipoDato(char * tipo)
 			yyerror(msg);
 		}
 	}
-	// Reinicio el contador para leer otro tipo de dato
 	longitud_arrayDeclaraciones = 0;
 }
 
@@ -698,13 +683,13 @@ void insertarEnArrayComparacionTipos(char * val)
 		sprintf(msg, "ERROR en etapa GCI - Variable \'%s\' no declarada en la seccion declaracion", yylval.str_val);
 		yyerror(msg);
 	}
-	// Luego insertamos el tipo de token en nuestro array
+	// Inserto tipo en array
 	char * tipo = recuperarTipoTS(val);
 	tipo = tipoConstanteConvertido(tipo);
 	char * aux = (char *) malloc(sizeof(strlen(tipo) + 1));
 	strcpy(aux, tipo);
-  arrayComparacionTipos[longitud_arrayComparacionTipos] = aux;
-  longitud_arrayComparacionTipos++;
+	arrayComparacionTipos[longitud_arrayComparacionTipos] = aux;
+	longitud_arrayComparacionTipos++;
 }
 
 void insertarEnArrayComparacionTiposDirecto(char * tipo)
@@ -769,16 +754,12 @@ char * tipoConstanteConvertido(char* tipoVar)
 	return tipoVar;
 }
 
-//////// ASSEMBLER ///////
+//////// ASSEMBLER 
 //Funcion que se encarga de generar el archivo y completarlo
-void generarASM(){
-    // Crear archivo
+void generarAssembler(){
 	pfASM = fopen("Final.asm", "w");
-
-    // Crear pilas para sacar los tercetos.
-
+    // Creo pilas para tercetos.
     crear_pila(&pVariables);
-
     generarEncabezado();
     generarDatos();
     generarCodigo();
@@ -796,15 +777,10 @@ void generarEncabezado(){
 }
 
 void generarDatos(){
-    //Encabezado del sector de datos
     fprintf(pfASM, "\t\n.DATA\t\t ; comienzo de la zona de datos.\n");
     fprintf(pfASM, "\tTRUE equ 1\n");
     fprintf(pfASM, "\tFALSE equ 0\n");
     fprintf(pfASM, "\tMAXTEXTSIZE equ %d\n",COTA_STR);
-
-
-    // fprintf(arch, "NEW_LINE DB 0AH,0DH,'$'\n");
-	// fprintf(arch, "CWprevio DW ?\n");
 
 	int i;
 	int tamTS = obtenerTamTS();
@@ -833,7 +809,7 @@ void generarDatos(){
 			fprintf(pfASM, "\t%s db %s, '$', %d dup(?)\n", tablaSimbolos[i].nombre, tablaSimbolos[i].valor, size);
 		}
 	}
-	// Auxiliares declarados
+	// Auxiliares
 	int tamTercetos = obtenerIndiceActual();
 	for(i=0; i<tamTercetos; i++)
 	{
@@ -851,21 +827,20 @@ void imprimirFuncString(){
     if (file) {
         fprintf(pfASM,"\n");
         while ((c = getc(file)) != EOF)
-            fprintf(pfASM,"%c",c);
+        fprintf(pfASM,"%c",c);
         fprintf(pfASM,"\n\n");
         fclose(file);
     }
 }
 
 void generarCodigo(){
-    fprintf(pfASM, "\n.CODE ;Comienzo de la zona de codigo\n");
+    fprintf(pfASM, "\n.CODE ;Comienza sector de codigo\n");
 
-	//Imprimo funciones de manejo de strings
     imprimirFuncString();
 
-    //Inicio codigo usuario
-    fprintf(pfASM, "START: \t\t;Código assembler resultante de compilar el programa fuente.\n");
-    fprintf(pfASM, "\tmov AX,@DATA \t\t;Inicializa el segmento de datos\n");
+    //Comienza codigo usuario
+    fprintf(pfASM, "START: \t\t;Codigo assembler resultante.\n");
+    fprintf(pfASM, "\tmov AX,@DATA \t\t;Comienza sector de datos\n");
     fprintf(pfASM, "\tmov DS,AX\n");
     fprintf(pfASM, "\tfinit\n\n");
 
@@ -874,7 +849,6 @@ void generarCodigo(){
 
 	char aux1[50];
 	char aux2[50];
-
 	char auxEtiqueta[50];
 
 	int flag;
@@ -895,8 +869,6 @@ void generarCodigo(){
     		char auxTipo[50] = "";
 			strcpy(auxTipo, tipo);
 
-			// fprintf(pfASM,"\t%s\n",auxEtiqueta);
-
 			if(strcmp(tipo,"CONST_STR") == 0 || strcmp(tipo,"STRING") == 0)
 			{
 				fprintf(pfASM, "\tmov ax,@DATA\n");
@@ -910,7 +882,6 @@ void generarCodigo(){
 				fprintf(pfASM, "\tfld %s\n",aux1);
                 fprintf(pfASM, "\tfstp %s\n\n",aux2);
 			}
-
 		}
 
 		if(strcmp(operador, "CMP") == 0)
@@ -998,7 +969,6 @@ void generarCodigo(){
 			sacar_de_pila(&pVariables,&aux2);
 			sacar_de_pila(&pVariables,&aux1);
 
-			// fprintf(pfASM,"\t%s\n",auxEtiqueta);
             fprintf(pfASM, "\tfld %s\n",aux1);
             fprintf(pfASM, "\tfld %s\n",aux2);
             fprintf(pfASM, "\tfsub\n");
@@ -1036,7 +1006,6 @@ void generarCodigo(){
 			sacar_de_pila(&pVariables,&aux2);
 			sacar_de_pila(&pVariables,&aux1);
 
-			// fprintf(pfASM,"\t%s\n",auxEtiqueta);
 			fprintf(pfASM, "\tfld %s\n",aux1);
             fprintf(pfASM, "\tfld %s\n",aux2);
             fprintf(pfASM, "\tfmul\n");
@@ -1055,7 +1024,6 @@ void generarCodigo(){
 			sacar_de_pila(&pVariables,&aux2);
 			sacar_de_pila(&pVariables,&aux1);
 
-			// fprintf(pfASM,"\t%s\n",auxEtiqueta);
 			fprintf(pfASM, "\tfld %s\n",aux1);
             fprintf(pfASM, "\tfld %s\n",aux2);
             fprintf(pfASM, "\tfdiv\n");
@@ -1073,11 +1041,10 @@ void generarCodigo(){
 			fprintf(pfASM,"\t;MOD\n");
 			sacar_de_pila(&pVariables,&aux2);
 			sacar_de_pila(&pVariables,&aux1);
-
-			// fprintf(pfASM,"\t%s\n",auxEtiqueta);
+			
 			fprintf(pfASM, "\tfld %s\n",aux1);
-						fprintf(pfASM, "\tfld %s\n",aux2);
-						fprintf(pfASM, "\tfdiv\n");
+			fprintf(pfASM, "\tfld %s\n",aux2);
+			fprintf(pfASM, "\tfdiv\n");
 
 			char auxStr[50] = "";
 			sprintf(auxStr, "@aux%d",i);
@@ -1094,10 +1061,9 @@ void generarCodigo(){
 			sacar_de_pila(&pVariables,&aux2);
 			sacar_de_pila(&pVariables,&aux1);
 
-			// fprintf(pfASM,"\t%s\n",auxEtiqueta);
 			fprintf(pfASM, "\tfild %s\n",aux1);
-						fprintf(pfASM, "\tfild %s\n",aux2);
-						fprintf(pfASM, "\tfdiv\n");
+			fprintf(pfASM, "\tfild %s\n",aux2);
+			fprintf(pfASM, "\tfdiv\n");
 
 			char auxStr[50] = "";
 			sprintf(auxStr, "@aux%d",i);
@@ -1116,7 +1082,6 @@ void generarCodigo(){
     		char auxTipo[50] = "";
 			strcpy(auxTipo, tipo);
 
-			// fprintf(pfASM,"\t%s\n",auxEtiqueta);
 			if(strcmp(tipo,"CONST_STR") == 0 || strcmp(tipo,"STRING") == 0)
 			{
 				fprintf(pfASM,"\tdisplayString %s\n",aux1);
@@ -1144,7 +1109,6 @@ void generarCodigo(){
     		char auxTipo[50] = "";
 			strcpy(auxTipo, tipo);
 
-			// fprintf(pfASM,"\t%s\n",auxEtiqueta);
 			if(strcmp(tipo,"CONST_STR") == 0 || strcmp(tipo,"STRING") == 0)
 			{
 				fprintf(pfASM,"\tgetString %s\n\n",aux1);
