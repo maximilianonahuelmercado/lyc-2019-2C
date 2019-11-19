@@ -33,7 +33,7 @@
 		// Declaro la pila (estructura externa que me servira para resolver GCI)
 		t_pila pila;
 		t_pila pila_condicion_doble;
-		t_pila pila_ciclo_especial;
+		t_pila pila_inlist;
 		t_pila pilaDatos;
 		t_pila pilaTemporal;
 		t_pila pilaDatosInversa;
@@ -218,16 +218,24 @@ sentencia:
 	ciclo
 	{
 		crearTerceto(obtenerNuevoNombreEtiqueta("fin_repeat"),"_","_");
+		startEtiqueta = 0;
 	}
-	| seleccion
-		{
-			crearTerceto(obtenerNuevoNombreEtiqueta("fin_seleccion"),"_","_");
-		}
+	| 
+	seleccion
+	{
+		crearTerceto(obtenerNuevoNombreEtiqueta("fin_seleccion"),"_","_");
+		startEtiqueta = 0;
+	}
 	| asignacion
 	| entrada_salida
 	| modulo
 	| division
-	| en_lista;
+	| en_lista
+	{	
+		crearTerceto(obtenerNuevoNombreEtiqueta("fin_inlist"),"_","_");
+		startEtiqueta = 0;
+	}
+	;
 
 ciclo:
 	REPEAT
@@ -287,23 +295,50 @@ division:
 	};
 
 en_lista:
-	{printf("\t\tINLIST\n");}
-	INLIST CAR_PA ID { indiceId = crearTerceto(yylval.str_val, "_", "_")} CAR_PYC CAR_CA lista_expresiones CAR_CC CAR_PC;
+	INLIST
+	{
+	printf("\t\tINLIST\n"); 
+	indiceAux = crearTerceto(obtenerNuevoNombreEtiqueta("inicio_inlist"),"_","_");
+	poner_en_pila(&pila,&indiceAux);
+	startEtiqueta = 1;
+	}
+	CAR_PA ID
+	{ 
+	indiceId = crearTerceto(yylval.str_val, "_", "_");
+	} 
+	CAR_PYC CAR_CA lista_expresiones CAR_CC CAR_PC
+	{
+	int indiceDesapilado;
+	sacar_de_pila(&pila_inlist, &indiceDesapilado);
+	modificarTerceto(indiceDesapilado, 1, "JE");
+	poner_en_pila(&pila,&indiceDesapilado);
+	printf("\t\tFIN DEL INLIST\n");
+	int indiceActual = obtenerIndiceActual();
+	while(pila_vacia(&pila_inlist) != PILA_VACIA)
+	{
+		sacar_de_pila(&pila_inlist, &indiceDesapilado); 
+		modificarTerceto(indiceDesapilado, 2, armarIndiceI(indicePrincipioBloque));
+	}
+	sacar_de_pila(&pila, &indiceDesapilado); 
+	modificarTerceto(indiceDesapilado, 2, armarIndiceI(indiceActual+1));
+	sacar_de_pila(&pila, &indiceDesapilado); 
+	crearTerceto("JMP",armarIndiceI(indiceDesapilado),"_");
+	}
+	;
 
 lista_expresiones:
 			expresion
 			{
-
 				crearTerceto("CMP",armarIndiceI(indiceId),armarIndiceD(indiceExpresion));
 				indiceComparador = crearTerceto("JNE","_","_");
-				poner_en_pila(&pila_ciclo_especial,&indiceComparador);
+				poner_en_pila(&pila_inlist,&indiceComparador);
 			}
 
 			| lista_expresiones CAR_PYC expresion
 			{
 				crearTerceto("CMP",armarIndiceI(indiceId),armarIndiceD(indiceExpresion));
 				indiceComparador = crearTerceto("JNE","_","_");
-				poner_en_pila(&pila_ciclo_especial,&indiceComparador);
+				poner_en_pila(&pila_inlist,&indiceComparador);
 			};
 
 asignacion:

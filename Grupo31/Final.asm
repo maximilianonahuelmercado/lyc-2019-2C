@@ -70,7 +70,6 @@ INCLUDE number.asm		 ;incluye el asm para impresion de numeros
 	@aux32 dd 0.0
 	@aux33 dd 0.0
 	@aux34 dd 0.0
-	@aux36 dd 0.0
 	@aux37 dd 0.0
 	@aux38 dd 0.0
 	@aux39 dd 0.0
@@ -78,54 +77,51 @@ INCLUDE number.asm		 ;incluye el asm para impresion de numeros
 	@aux41 dd 0.0
 	@aux42 dd 0.0
 	@aux43 dd 0.0
-	@aux45 dd 0.0
+	@aux44 dd 0.0
 	@aux46 dd 0.0
 	@aux47 dd 0.0
-	@aux49 dd 0.0
-	@aux50 dd 0.0
+	@aux48 dd 0.0
 	@aux51 dd 0.0
 	@aux52 dd 0.0
 	@aux53 dd 0.0
 	@aux54 dd 0.0
 	@aux55 dd 0.0
 	@aux56 dd 0.0
+	@aux57 dd 0.0
 	@aux58 dd 0.0
-	@aux59 dd 0.0
 	@aux60 dd 0.0
 	@aux61 dd 0.0
+	@aux62 dd 0.0
 	@aux63 dd 0.0
-	@aux64 dd 0.0
 	@aux65 dd 0.0
+	@aux66 dd 0.0
 	@aux67 dd 0.0
-	@aux68 dd 0.0
-	@aux69 dd 0.0
 	@aux70 dd 0.0
 	@aux71 dd 0.0
 	@aux72 dd 0.0
 	@aux73 dd 0.0
 	@aux74 dd 0.0
+	@aux75 dd 0.0
 	@aux76 dd 0.0
 	@aux77 dd 0.0
-	@aux78 dd 0.0
 	@aux79 dd 0.0
+	@aux80 dd 0.0
 	@aux81 dd 0.0
 	@aux82 dd 0.0
-	@aux83 dd 0.0
 	@aux84 dd 0.0
+	@aux85 dd 0.0
 	@aux86 dd 0.0
 	@aux87 dd 0.0
-	@aux88 dd 0.0
 	@aux89 dd 0.0
+	@aux90 dd 0.0
 	@aux91 dd 0.0
 	@aux92 dd 0.0
-	@aux93 dd 0.0
 	@aux94 dd 0.0
 	@aux95 dd 0.0
 	@aux96 dd 0.0
+	@aux97 dd 0.0
+	@aux98 dd 0.0
 	@aux99 dd 0.0
-	@aux100 dd 0.0
-	@aux101 dd 0.0
-	@aux102 dd 0.0
 	@aux103 dd 0.0
 	@aux104 dd 0.0
 	@aux105 dd 0.0
@@ -144,7 +140,6 @@ INCLUDE number.asm		 ;incluye el asm para impresion de numeros
 	@aux118 dd 0.0
 	@aux119 dd 0.0
 	@aux120 dd 0.0
-	@aux121 dd 0.0
 	@aux122 dd 0.0
 	@aux123 dd 0.0
 	@aux124 dd 0.0
@@ -153,7 +148,6 @@ INCLUDE number.asm		 ;incluye el asm para impresion de numeros
 	@aux127 dd 0.0
 	@aux128 dd 0.0
 	@aux129 dd 0.0
-	@aux130 dd 0.0
 	@aux131 dd 0.0
 	@aux132 dd 0.0
 	@aux133 dd 0.0
@@ -162,6 +156,14 @@ INCLUDE number.asm		 ;incluye el asm para impresion de numeros
 	@aux136 dd 0.0
 	@aux137 dd 0.0
 	@aux138 dd 0.0
+	@aux139 dd 0.0
+	@aux140 dd 0.0
+	@aux141 dd 0.0
+	@aux142 dd 0.0
+	@aux143 dd 0.0
+	@aux144 dd 0.0
+	@aux145 dd 0.0
+	@aux146 dd 0.0
 
 .CODE ;Comienzo de la zona de codigo
 START: 		;Código assembler resultante de compilar el programa fuente.
@@ -237,6 +239,9 @@ ETIQ_inicio_18:
 
 
 ETIQ_fin_repeat_35:
+
+
+ETIQ_inicio_36:
 	;CMP
 	fld i
 	fld &cte6
@@ -245,7 +250,7 @@ ETIQ_fin_repeat_35:
 	fwait
 	sahf
 
-	je ETIQ_fin_seleccion_48
+	je ETIQ_fin_seleccion_49
 	;CMP
 	fld a
 	fld &cte7
@@ -254,17 +259,20 @@ ETIQ_fin_repeat_35:
 	fwait
 	sahf
 
-	je ETIQ_fin_seleccion_48
+	je ETIQ_fin_seleccion_49
 
 
-ETIQ_inicio_44:
+ETIQ_inicio_45:
 	;ASIGNACIÓN
 	fld &cte8
 	fstp i
 
 
 
-ETIQ_fin_seleccion_48:
+ETIQ_fin_seleccion_49:
+
+
+ETIQ_inicio_50:
 	;CMP
 	fld i
 	fld &cte6
@@ -273,7 +281,7 @@ ETIQ_fin_seleccion_48:
 	fwait
 	sahf
 
-	je ETIQ_inicio_62
+	je ETIQ_inicio_64
 	;CMP
 	fld a
 	fld &cte7
@@ -282,25 +290,28 @@ ETIQ_fin_seleccion_48:
 	fwait
 	sahf
 
-	je ETIQ_inicio_62
+	je ETIQ_inicio_64
 
 
-ETIQ_inicio_57:
+ETIQ_inicio_59:
 	;ASIGNACIÓN
 	fld &cte8
 	fstp i
 
-	jmp ETIQ_fin_seleccion_66
+	jmp ETIQ_fin_seleccion_68
 
 
-ETIQ_inicio_62:
+ETIQ_inicio_64:
 	;ASIGNACIÓN
 	fld &cte9
 	fstp i
 
 
 
-ETIQ_fin_seleccion_66:
+ETIQ_fin_seleccion_68:
+
+
+ETIQ_inicio_69:
 	;CMP
 	fld i
 	fld &cte6
@@ -309,159 +320,9 @@ ETIQ_fin_seleccion_66:
 	fwait
 	sahf
 
-	je ETIQ_inicio_80
+	je ETIQ_inicio_83
 	;CMP
 	fld a
 	fld &cte7
 	fcomp
-	fstsw ax
-	fwait
-	sahf
-
-	je ETIQ_inicio_80
-
-
-ETIQ_inicio_75:
-	;ASIGNACIÓN
-	fld &cte8
-	fstp i
-
-	jmp ETIQ_inicio_0
-
-
-ETIQ_inicio_80:
-	;CMP
-	fld j
-	fld &cte2
-	fcomp
-	fstsw ax
-	fwait
-	sahf
-
-	jne ETIQ_inicio_90
-
-
-ETIQ_inicio_85:
-	;CMP
-	fld w
-	fld &cte10
-	fcomp
-	fstsw ax
-	fwait
-	sahf
-
-	je ETIQ_fin_seleccion_98
-
-
-ETIQ_inicio_90:
-	;ASIGNACIÓN
-	fld &cte9
-	fstp i
-
-	;ASIGNACIÓN
-	fld &cte11
-	fstp j
-
-
-
-ETIQ_fin_seleccion_97:
-
-
-ETIQ_fin_seleccion_98:
-	;SUMA
-	fld a
-	fld b
-	fadd
-	fstp @aux101
-
-	;SUMA
-	fld @aux101
-	fld c
-	fadd
-	fstp @aux103
-
-	;RESTA
-	fld b
-	fld c
-	fsub
-	fstp @aux106
-
-	;RESTA
-	fld @aux106
-	fld j
-	fsub
-	fstp @aux108
-
-	;MOD
-	fld @aux103
-	fld @aux108
-	fdiv
-	fstp @aux109
-
-	;RESTA
-	fld a
-	fld b
-	fsub
-	fstp @aux112
-
-	;SUMA
-	fld b
-	fld c
-	fadd
-	fstp @aux115
-
-	;DIV
-	fild @aux112
-	fild @aux115
-	fdiv
-	fstp @aux116
-
-	;CMP
-	fld @aux116
-	fld &cte12
-	fcomp
-	fstsw ax
-	fwait
-	sahf
-
-	jne ETIQ_inicio_0
-	;CMP
-	fld @aux109
-	fld &cte13
-	fcomp
-	fstsw ax
-	fwait
-	sahf
-
-	jne ETIQ_inicio_0
-	;PRINT
-	GetFloat b
-
-	;PRINT
-	getString &cte14
-
-	;PRINT
-	getString &cte15
-
-	;PRINT
-	getString &cte16
-
-	;READ
-	DisplayFloat p 2
-	newLine 1
-
-	;PRINT
-	GetFloat i
-
-	;PRINT
-	getString &cte17
-
-	;PRINT
-	getString &cte18
-
-
-TERMINAR: ;Fin de ejecución.
-	mov ax, 4C00h ;termina la ejecución.
-	int 21h ;syscall
-
-END START ;final del archivo.
+	fs
